@@ -1,0 +1,76 @@
+Online Education Platform - ER Diagram
+&amp; Authentication Design
+
+1. Overview
+This document outlines the database Entity-Relationship (ER) design and authentication
+system for the online education platform. The system supports three roles: Admin, Teacher,
+and Student.
+
+2. Entities and Descriptions
+Users
+Stores all platform users including admin, teachers, and students.
+Teacher Profiles
+Contains additional details for teachers such as qualifications, bio, and per-class rate.
+Student Profiles
+Stores student-specific information.
+Courses
+Represents courses created by teachers.
+Enrollments
+Maps students to courses (many-to-many relationship).
+Classes
+Represents individual sessions/lectures within a course.
+Attendance
+Tracks student attendance per class.
+Earnings
+Tracks teacher earnings per completed class.
+Assignments
+Assignments created by teachers for a course.
+Submissions
+Student submissions for assignments.
+
+Materials
+Notes and learning resources uploaded by teachers.
+Reschedules
+Handles rescheduling requests for classes.
+Calendar Events
+Optional table for additional scheduling events.
+
+3. ER Diagram (Text Representation)
+Users (1) ---- (1) Teacher Profiles
+Users (1) ---- (1) Student Profiles
+Users (1) ---- (M) Courses (Teacher)
+Courses (1) ---- (M) Classes
+Courses (M) ---- (M) Students via Enrollments
+Classes (1) ---- (M) Attendance
+Courses (1) ---- (M) Assignments
+Assignments (1) ---- (M) Submissions
+Classes (1) ---- (1) Earnings (Teacher)
+Classes (1) ---- (M) Reschedules
+
+4. Authentication System Design
+4.1 Authentication Method
+JWT (JSON Web Token) based authentication will be used for secure login and session
+management.
+4.2 Login Flow
+1. User submits email and password.
+2. Backend verifies credentials.
+3. If valid, generate JWT token.
+4. Token is returned to client.
+5. Client stores token (local storage or cookie).
+6. Token is sent with every API request.
+4.3 Token Payload
+Payload will include:
+- user_id
+- role (admin/teacher/student)
+- email
+4.4 Authorization
+
+Role-based access control will be implemented:
+- Admin: Full access
+- Teacher: Manage courses, classes, assignments
+- Student: View courses, attend classes, submit assignments
+4.5 Security Measures
+- Passwords stored using hashing (bcrypt)
+- Token expiration
+- HTTPS usage
+- Input validation
