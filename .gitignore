@@ -1,0 +1,31 @@
+# === Secrets & Credentials ===
+**/firebase-service-account.json
+.env
+.env.local
+.env.*.local
+backend/.env
+frontend/.env
+
+# === IDE ===
+.idea/
+*.iml
+.vscode/
+*.suo
+*.sw?
+.DS_Store
+
+# === Java / Maven ===
+**/target/
+*.class
+*.jar
+*.war
+*.log
+
+# === Node / Frontend ===
+node_modules/
+dist/
+dist-ssr/
+
+# === OS ===
+Thumbs.db
+.DS_Store
