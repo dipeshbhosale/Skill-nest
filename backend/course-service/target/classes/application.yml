@@ -1,0 +1,20 @@
+server:
+  port: 8083
+
+spring:
+  application:
+    name: course-service
+
+# JWT Configuration
+jwt:
+  secret: skill-nest-jwt-secret-key-2026-very-long-and-secure-key-for-signing-tokens
+  expiration: 86400000  # 24 hours in ms
+
+# Firebase Configuration
+firebase:
+  config-path: classpath:firebase-service-account.json
+  database-url: https://your-project-id.firebaseio.com
+
+# CORS
+cors:
+  allowed-origins: http://localhost:5173

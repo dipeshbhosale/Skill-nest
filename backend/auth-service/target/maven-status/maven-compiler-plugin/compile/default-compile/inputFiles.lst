@@ -1,0 +1,11 @@
+/workspaces/Skill-nest/backend/auth-service/src/main/java/com/skillnest/auth/AuthServiceApplication.java
+/workspaces/Skill-nest/backend/auth-service/src/main/java/com/skillnest/auth/config/FirebaseConfig.java
+/workspaces/Skill-nest/backend/auth-service/src/main/java/com/skillnest/auth/config/SecurityConfig.java
+/workspaces/Skill-nest/backend/auth-service/src/main/java/com/skillnest/auth/controller/AuthController.java
+/workspaces/Skill-nest/backend/auth-service/src/main/java/com/skillnest/auth/dto/AuthResponse.java
+/workspaces/Skill-nest/backend/auth-service/src/main/java/com/skillnest/auth/dto/LoginRequest.java
+/workspaces/Skill-nest/backend/auth-service/src/main/java/com/skillnest/auth/dto/RegisterRequest.java
+/workspaces/Skill-nest/backend/auth-service/src/main/java/com/skillnest/auth/model/User.java
+/workspaces/Skill-nest/backend/auth-service/src/main/java/com/skillnest/auth/security/JwtAuthenticationFilter.java
+/workspaces/Skill-nest/backend/auth-service/src/main/java/com/skillnest/auth/security/JwtTokenProvider.java
+/workspaces/Skill-nest/backend/auth-service/src/main/java/com/skillnest/auth/service/AuthService.java

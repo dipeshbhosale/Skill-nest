@@ -1,0 +1,10 @@
+/workspaces/Skill-nest/backend/user-service/src/main/java/com/skillnest/user/UserServiceApplication.java
+/workspaces/Skill-nest/backend/user-service/src/main/java/com/skillnest/user/config/FirebaseConfig.java
+/workspaces/Skill-nest/backend/user-service/src/main/java/com/skillnest/user/config/SecurityConfig.java
+/workspaces/Skill-nest/backend/user-service/src/main/java/com/skillnest/user/controller/UserController.java
+/workspaces/Skill-nest/backend/user-service/src/main/java/com/skillnest/user/model/StudentProfile.java
+/workspaces/Skill-nest/backend/user-service/src/main/java/com/skillnest/user/model/TeacherProfile.java
+/workspaces/Skill-nest/backend/user-service/src/main/java/com/skillnest/user/model/User.java
+/workspaces/Skill-nest/backend/user-service/src/main/java/com/skillnest/user/security/JwtAuthenticationFilter.java
+/workspaces/Skill-nest/backend/user-service/src/main/java/com/skillnest/user/security/JwtTokenProvider.java
+/workspaces/Skill-nest/backend/user-service/src/main/java/com/skillnest/user/service/UserService.java

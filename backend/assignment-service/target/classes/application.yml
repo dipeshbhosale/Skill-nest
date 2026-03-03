@@ -1,0 +1,14 @@
+server:
+  port: 8084
+
+spring:
+  application:
+    name: assignment-service
+
+jwt:
+  secret: SkillNestSecretKey2024ForJWTTokenGenerationAndValidation
+  expiration: 86400000
+
+firebase:
+  config:
+    path: classpath:firebase-service-account.json
