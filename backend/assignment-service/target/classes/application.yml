@@ -6,9 +6,13 @@ spring:
     name: assignment-service
 
 jwt:
-  secret: SkillNestSecretKey2024ForJWTTokenGenerationAndValidation
+  secret: skill-nest-jwt-secret-key-2026-very-long-and-secure-key-for-signing-tokens
   expiration: 86400000
 
 firebase:
-  config:
-    path: classpath:firebase-service-account.json
+  config-path: classpath:firebase-service-account.json
+  database-url: 
+
+# CORS
+cors:
+  allowed-origins: http://localhost:5173,http://localhost:5174

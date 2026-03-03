@@ -13,8 +13,8 @@ jwt:
 # Firebase Configuration
 firebase:
   config-path: classpath:firebase-service-account.json
-  database-url: https://your-project-id.firebaseio.com
+  database-url: 
 
 # CORS
 cors:
-  allowed-origins: http://localhost:5173
+  allowed-origins: http://localhost:5173,http://localhost:5174
