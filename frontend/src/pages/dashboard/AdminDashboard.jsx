@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
 import StatsCard from '../../components/ui/StatsCard';
 import DataTable from '../../components/ui/DataTable';
+import Card from '../../components/ui/Card';
+import PageHeader from '../../components/ui/PageHeader';
 import api from '../../config/api';
 import {
   HiOutlineUsers,
@@ -36,10 +38,10 @@ const AdminDashboard = () => {
   }, []);
 
   const stats = [
-    { title: 'Total Users', value: users.length.toString(), change: 0, icon: HiOutlineUsers, color: 'primary' },
-    { title: 'Total Courses', value: courses.length.toString(), change: 0, icon: HiOutlineBookOpen, color: 'success' },
-    { title: 'Active Classes', value: classes.length.toString(), change: 0, icon: HiOutlineAcademicCap, color: 'warning' },
-    { title: 'Revenue', value: '₹0', change: 0, icon: HiOutlineCurrencyDollar, color: 'info' },
+    { title: 'Total Users', value: users.length.toString(), icon: HiOutlineUsers, color: 'primary' },
+    { title: 'Total Courses', value: courses.length.toString(), icon: HiOutlineBookOpen, color: 'success' },
+    { title: 'Active Classes', value: classes.length.toString(), icon: HiOutlineAcademicCap, color: 'warning' },
+    { title: 'Total Teachers', value: users.filter(u => u.role === 'teacher').length.toString(), icon: HiOutlineCurrencyDollar, color: 'info' },
   ];
 
   const recentUsers = users.slice(0, 5).map((user, index) => ({
@@ -52,31 +54,44 @@ const AdminDashboard = () => {
   }));
 
   const userColumns = [
-    { header: 'Name', render: (row) => <span className="text-white font-medium">{row.name}</span> },
+    { header: 'Name', render: (row) => <span className="text-navy-800 font-medium">{row.name}</span> },
     { header: 'Email', accessor: 'email' },
-    { header: 'Role', render: (row) => (
-      <span className={`px-2 py-0.5 rounded-full text-xs font-medium capitalize
-        ${row.role === 'teacher' ? 'bg-brand-primary/20 text-brand-accent' : row.role === 'admin' ? 'bg-error/20 text-error' : 'bg-success/20 text-success'}`}>
-        {row.role}
-      </span>
-    )},
-    { header: 'Status', render: (row) => (
-      <span className={`px-2 py-0.5 rounded-full text-xs font-medium
-        ${row.status === 'active' ? 'bg-success/20 text-success' : 'bg-text-muted/20 text-text-muted'}`}>
-        {row.status}
-      </span>
-    )},
+    {
+      header: 'Role',
+      render: (row) => (
+        <span
+          className={`px-2.5 py-0.5 rounded-full text-xs font-medium capitalize ${
+            row.role === 'teacher'
+              ? 'bg-brand-light text-brand-primary'
+              : row.role === 'admin'
+              ? 'bg-red-50 text-error'
+              : 'bg-green-50 text-success'
+          }`}
+        >
+          {row.role}
+        </span>
+      ),
+    },
+    {
+      header: 'Status',
+      render: (row) => (
+        <span
+          className={`px-2.5 py-0.5 rounded-full text-xs font-medium ${
+            row.status === 'active' ? 'bg-green-50 text-success' : 'bg-gray-100 text-text-muted'
+          }`}
+        >
+          {row.status}
+        </span>
+      ),
+    },
     { header: 'Joined', accessor: 'joined' },
   ];
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold text-white">Admin Dashboard</h1>
-        <p className="text-text-secondary mt-1">Platform overview and management.</p>
-      </div>
+      <PageHeader title="Admin Dashboard" subtitle="Platform overview and management." />
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
         {stats.map((stat, i) => (
           <StatsCard key={i} {...stat} />
         ))}
@@ -85,24 +100,26 @@ const AdminDashboard = () => {
       {/* Recent Users */}
       <div>
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg font-semibold text-white">Recent Users</h2>
-          <button className="text-sm text-brand-primary hover:text-brand-accent">View All</button>
+          <h2 className="text-lg font-semibold text-navy-800">Recent Users</h2>
+          <button className="text-sm text-brand-primary hover:text-brand-secondary font-medium">
+            View All
+          </button>
         </div>
         <DataTable columns={userColumns} data={recentUsers} />
       </div>
 
-      {/* Platform Stats */}
+      {/* Bottom cards */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div className="bg-surface-card rounded-2xl p-6 border border-navy-600/20">
-          <h2 className="text-lg font-semibold text-white mb-4">User Distribution</h2>
+        <Card>
+          <h2 className="text-lg font-semibold text-navy-800 mb-4">User Distribution</h2>
           {users.length === 0 ? (
             <p className="text-text-muted text-sm">No users registered yet.</p>
           ) : (
             <div className="space-y-4">
               {(() => {
-                const studentCount = users.filter(u => u.role === 'student').length;
-                const teacherCount = users.filter(u => u.role === 'teacher').length;
-                const adminCount = users.filter(u => u.role === 'admin').length;
+                const studentCount = users.filter((u) => u.role === 'student').length;
+                const teacherCount = users.filter((u) => u.role === 'teacher').length;
+                const adminCount = users.filter((u) => u.role === 'admin').length;
                 const total = users.length || 1;
                 return [
                   { label: 'Students', count: studentCount, total, color: 'bg-success' },
@@ -112,11 +129,11 @@ const AdminDashboard = () => {
                   <div key={i}>
                     <div className="flex justify-between text-sm mb-1">
                       <span className="text-text-secondary">{item.label}</span>
-                      <span className="text-white">{item.count}</span>
+                      <span className="text-navy-700 font-medium">{item.count}</span>
                     </div>
-                    <div className="w-full h-2 bg-navy-700 rounded-full overflow-hidden">
+                    <div className="w-full h-2 bg-surface-bg rounded-full overflow-hidden">
                       <div
-                        className={`h-full ${item.color} rounded-full`}
+                        className={`h-full ${item.color} rounded-full transition-all`}
                         style={{ width: `${(item.count / item.total) * 100}%` }}
                       />
                     </div>
@@ -125,10 +142,10 @@ const AdminDashboard = () => {
               })()}
             </div>
           )}
-        </div>
+        </Card>
 
-        <div className="bg-surface-card rounded-2xl p-6 border border-navy-600/20">
-          <h2 className="text-lg font-semibold text-white mb-4">Quick Actions</h2>
+        <Card>
+          <h2 className="text-lg font-semibold text-navy-800 mb-4">Quick Actions</h2>
           <div className="grid grid-cols-2 gap-3">
             {[
               { label: 'Add User', icon: HiOutlineUsers, color: 'from-brand-primary to-brand-secondary' },
@@ -138,16 +155,18 @@ const AdminDashboard = () => {
             ].map((action, i) => (
               <button
                 key={i}
-                className="flex flex-col items-center gap-2 p-4 rounded-xl bg-navy-700/50 hover:bg-navy-700 transition-colors"
+                className="flex flex-col items-center gap-2 p-4 rounded-xl bg-surface-bg hover:bg-surface-hover transition-colors border border-surface-border"
               >
-                <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${action.color} flex items-center justify-center`}>
+                <div
+                  className={`w-10 h-10 rounded-xl bg-gradient-to-br ${action.color} flex items-center justify-center shadow-md`}
+                >
                   <action.icon className="w-5 h-5 text-white" />
                 </div>
-                <span className="text-xs text-text-secondary">{action.label}</span>
+                <span className="text-xs text-navy-600 font-medium">{action.label}</span>
               </button>
             ))}
           </div>
-        </div>
+        </Card>
       </div>
     </div>
   );

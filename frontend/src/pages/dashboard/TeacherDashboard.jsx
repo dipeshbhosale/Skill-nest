@@ -1,154 +1,204 @@
 import { useState, useEffect } from 'react';
+import { useAuth } from '../../context/AuthContext';
 import StatsCard from '../../components/ui/StatsCard';
-import CourseCard from '../../components/ui/CourseCard';
+import Card from '../../components/ui/Card';
+import PageHeader from '../../components/ui/PageHeader';
 import api from '../../config/api';
 import {
   HiOutlineBookOpen,
-  HiOutlineAcademicCap,
-  HiOutlineUsers,
+  HiOutlineUserGroup,
+  HiOutlineClipboardList,
   HiOutlineCurrencyDollar,
   HiOutlineCalendar,
-  HiOutlineClock,
+  HiOutlinePlus,
 } from 'react-icons/hi';
 
 const TeacherDashboard = () => {
+  const { user } = useAuth();
   const [courses, setCourses] = useState([]);
-  const [classes, setClasses] = useState([]);
-  const [submissions, setSubmissions] = useState([]);
+  const [upcomingClasses, setUpcomingClasses] = useState([]);
+  const [totalStudents, setTotalStudents] = useState(0);
+  const [assignments, setAssignments] = useState([]);
+  const [earnings, setEarnings] = useState(0);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchData = async () => {
+    const fetchDashboardData = async () => {
       try {
-        const [coursesRes, classesRes, submissionsRes] = await Promise.all([
-          api.get('/courses').catch(() => ({ data: [] })),
-          api.get('/classes').catch(() => ({ data: [] })),
-          api.get('/submissions').catch(() => ({ data: [] })),
-        ]);
+        // Fetch teacher's courses
+        const coursesRes = await api.get('/courses/my-courses').catch(() => ({ data: [] }));
         setCourses(coursesRes.data || []);
-        setClasses(classesRes.data || []);
-        setSubmissions(submissionsRes.data || []);
+
+        // Fetch upcoming classes
+        const classesRes = await api.get('/classes/upcoming').catch(() => ({ data: [] }));
+        setUpcomingClasses(classesRes.data || []);
+
+        // Fetch total students
+        const studentsRes = await api.get('/teachers/stats/students').catch(() => ({ data: { total: 0 } }));
+        setTotalStudents(studentsRes.data?.total || 0);
+
+        // Fetch assignments
+        const assignmentsRes = await api.get('/assignments/my-assignments').catch(() => ({ data: [] }));
+        setAssignments(assignmentsRes.data || []);
+
+        // Fetch earnings
+        const earningsRes = await api.get('/earnings/total').catch(() => ({ data: { total: 0 } }));
+        setEarnings(earningsRes.data?.total || 0);
       } catch (error) {
         console.error('Error fetching dashboard data:', error);
       } finally {
         setLoading(false);
       }
     };
-    fetchData();
+    fetchDashboardData();
   }, []);
 
-  const totalStudents = courses.reduce((sum, c) => sum + (c.enrolledStudents || 0), 0);
-
   const stats = [
-    { title: 'Total Courses', value: courses.length.toString(), change: 0, icon: HiOutlineBookOpen, color: 'primary' },
-    { title: 'Total Students', value: totalStudents.toString(), change: 0, icon: HiOutlineUsers, color: 'success' },
-    { title: 'Classes This Week', value: classes.length.toString(), change: 0, icon: HiOutlineAcademicCap, color: 'warning' },
-    { title: 'Total Earnings', value: '₹0', change: 0, icon: HiOutlineCurrencyDollar, color: 'info' },
+    { title: 'My Courses', value: courses.length.toString(), icon: HiOutlineBookOpen, color: 'primary' },
+    { title: 'Total Students', value: totalStudents.toString(), icon: HiOutlineUserGroup, color: 'success' },
+    { title: 'Assignments', value: assignments.length.toString(), icon: HiOutlineClipboardList, color: 'warning' },
+    { title: 'Earnings', value: `₹${earnings.toLocaleString()}`, icon: HiOutlineCurrencyDollar, color: 'info' },
   ];
 
-  const upcomingClasses = classes.slice(0, 4);
-  const recentSubmissions = submissions.slice(0, 3);
-  const recentCourses = courses.slice(0, 3);
+  if (loading) {
+    return (
+      <div className="space-y-6">
+        <PageHeader
+          title={`Welcome, ${user?.name || 'Teacher'}`}
+          subtitle="Loading your dashboard..."
+        />
+        <div className="flex items-center justify-center py-12">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-brand-primary"></div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold text-white">Teacher Dashboard</h1>
-          <p className="text-text-secondary mt-1">Welcome back! Here's your overview.</p>
-        </div>
-        <button className="inline-flex items-center gap-2 gradient-primary text-white px-5 py-2.5 rounded-xl text-sm font-medium shadow-lg shadow-brand-primary/25 hover:shadow-brand-primary/40 transition-all">
-          <HiOutlineBookOpen className="w-4 h-4" />
-          Create Course
-        </button>
-      </div>
+      <PageHeader
+        title={`Welcome, ${user?.name || 'Teacher'}`}
+        subtitle="Here's what's happening with your classes today."
+      />
 
-      {/* Stats Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
         {stats.map((stat, i) => (
           <StatsCard key={i} {...stat} />
         ))}
       </div>
 
-      {/* Main Content Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Upcoming Classes */}
-        <div className="lg:col-span-2 bg-surface-card rounded-2xl p-6 border border-navy-600/20">
-          <div className="flex items-center justify-between mb-5">
-            <h2 className="text-lg font-semibold text-white">Upcoming Classes</h2>
-            <button className="text-sm text-brand-primary hover:text-brand-accent">View All</button>
-          </div>
-          {upcomingClasses.length === 0 ? (
-            <p className="text-text-muted text-sm">No upcoming classes scheduled.</p>
-          ) : (
-            <div className="space-y-3">
-              {upcomingClasses.map((cls) => (
-                <div
-                  key={cls.id}
-                  className="flex items-center gap-4 p-4 rounded-xl bg-navy-700/50 hover:bg-navy-700 transition-colors"
-                >
-                  <div className="w-12 h-12 rounded-xl gradient-primary flex items-center justify-center flex-shrink-0">
-                    <HiOutlineClock className="w-5 h-5 text-white" />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <h3 className="text-sm font-medium text-white truncate">{cls.title}</h3>
-                    <p className="text-xs text-text-muted">{cls.courseId}</p>
-                  </div>
-                  <div className="text-right flex-shrink-0">
-                    <p className="text-sm text-white">{cls.time}</p>
-                    <p className="text-xs text-text-muted">{cls.date}</p>
-                  </div>
-                </div>
-              ))}
+        <div className="lg:col-span-2">
+          <Card>
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-lg font-semibold text-navy-800">Upcoming Classes</h2>
+              <a
+                href="/classes"
+                className="text-sm text-brand-primary hover:text-brand-dark font-medium"
+              >
+                View All
+              </a>
             </div>
-          )}
+            {upcomingClasses.length > 0 ? (
+              <div className="space-y-3">
+                {upcomingClasses.slice(0, 3).map((cls) => (
+                  <div
+                    key={cls.id}
+                    className="flex items-center justify-between p-4 rounded-xl bg-surface-bg border border-surface-border hover:shadow-sm transition-shadow"
+                  >
+                    <div className="flex items-center gap-4">
+                      <div className="w-12 h-12 rounded-xl bg-brand-light flex items-center justify-center">
+                        <HiOutlineCalendar className="w-6 h-6 text-brand-primary" />
+                      </div>
+                      <div>
+                        <p className="font-semibold text-navy-800 text-sm">{cls.title || cls.courseName}</p>
+                        <p className="text-xs text-text-muted">
+                          {new Date(cls.date).toLocaleDateString()} at {cls.startTime}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-sm font-medium text-navy-700">{cls.enrolledStudents || 0}</p>
+                      <p className="text-xs text-text-muted">students</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-12">
+                <HiOutlineCalendar className="mx-auto h-12 w-12 text-text-muted mb-3" />
+                <p className="text-text-muted">No upcoming classes scheduled</p>
+                <p className="text-sm text-text-muted mt-1">Create a class to get started</p>
+              </div>
+            )}
+          </Card>
         </div>
 
-        {/* Recent Submissions */}
-        <div className="bg-surface-card rounded-2xl p-6 border border-navy-600/20">
-          <div className="flex items-center justify-between mb-5">
-            <h2 className="text-lg font-semibold text-white">Recent Submissions</h2>
-            <button className="text-sm text-brand-primary hover:text-brand-accent">View All</button>
+        {/* Quick Actions */}
+        <Card>
+          <h2 className="text-lg font-semibold text-navy-800 mb-4">Quick Actions</h2>
+          <div className="space-y-3">
+            <a
+              href="/courses/new"
+              className="flex items-center gap-3 p-3 rounded-xl bg-brand-light border border-brand-primary/20 hover:bg-brand-primary/10 transition-colors"
+            >
+              <div className="w-10 h-10 rounded-lg bg-brand-primary flex items-center justify-center">
+                <HiOutlinePlus className="w-5 h-5 text-white" />
+              </div>
+              <div>
+                <p className="font-medium text-navy-800 text-sm">Create Course</p>
+                <p className="text-xs text-text-muted">Start a new course</p>
+              </div>
+            </a>
+            <a
+              href="/assignments/new"
+              className="flex items-center gap-3 p-3 rounded-xl bg-surface-bg border border-surface-border hover:bg-surface-bg/80 transition-colors"
+            >
+              <div className="w-10 h-10 rounded-lg bg-warning/10 flex items-center justify-center">
+                <HiOutlineClipboardList className="w-5 h-5 text-warning" />
+              </div>
+              <div>
+                <p className="font-medium text-navy-800 text-sm">New Assignment</p>
+                <p className="text-xs text-text-muted">Create assignment</p>
+              </div>
+            </a>
+            <a
+              href="/classes/new"
+              className="flex items-center gap-3 p-3 rounded-xl bg-surface-bg border border-surface-border hover:bg-surface-bg/80 transition-colors"
+            >
+              <div className="w-10 h-10 rounded-lg bg-success/10 flex items-center justify-center">
+                <HiOutlineCalendar className="w-5 h-5 text-success" />
+              </div>
+              <div>
+                <p className="font-medium text-navy-800 text-sm">Schedule Class</p>
+                <p className="text-xs text-text-muted">Add to calendar</p>
+              </div>
+            </a>
           </div>
-          {recentSubmissions.length === 0 ? (
-            <p className="text-text-muted text-sm">No submissions yet.</p>
-          ) : (
-            <div className="space-y-3">
-              {recentSubmissions.map((sub) => (
-                <div key={sub.id} className="p-3 rounded-xl bg-navy-700/50 hover:bg-navy-700 transition-colors">
-                  <div className="flex items-center justify-between mb-1">
-                    <p className="text-sm font-medium text-white">{sub.studentName || 'Student'}</p>
-                    <span className={`px-2 py-0.5 rounded-full text-xs font-medium
-                      ${sub.status === 'graded' ? 'bg-success/20 text-success' : 'bg-warning/20 text-warning'}`}>
-                      {sub.status || 'pending'}
-                    </span>
-                  </div>
-                  <p className="text-xs text-text-muted">{sub.assignmentId}</p>
-                  <p className="text-xs text-text-muted mt-1">{sub.submittedAt || ''}</p>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
+        </Card>
       </div>
 
-      {/* My Courses */}
-      <div>
-        <div className="flex items-center justify-between mb-5">
-          <h2 className="text-lg font-semibold text-white">My Courses</h2>
-          <button className="text-sm text-brand-primary hover:text-brand-accent">View All</button>
-        </div>
-        {recentCourses.length === 0 ? (
-          <p className="text-text-muted text-sm">No courses created yet. Create your first course!</p>
-        ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {recentCourses.map((course) => (
-              <CourseCard key={course.id} course={course} />
-            ))}
+      {/* Getting Started */}
+      {courses.length === 0 && (
+        <Card>
+          <h2 className="text-lg font-semibold text-navy-800 mb-4">Get Started</h2>
+          <div className="text-center py-8">
+            <HiOutlineBookOpen className="mx-auto h-16 w-16 text-brand-primary mb-4" />
+            <h3 className="text-lg font-semibold text-navy-800 mb-2">Welcome to Skill Nest!</h3>
+            <p className="text-text-muted mb-6 max-w-md mx-auto">
+              Start your teaching journey by creating your first course. Share your knowledge with students worldwide.
+            </p>
+            <a
+              href="/courses/new"
+              className="inline-flex items-center px-6 py-3 bg-brand-primary text-white rounded-xl font-medium hover:bg-brand-dark transition-colors"
+            >
+              <HiOutlinePlus className="w-5 h-5 mr-2" />
+              Create Your First Course
+            </a>
           </div>
-        )}
-      </div>
+        </Card>
+      )}
     </div>
   );
 };

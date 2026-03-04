@@ -1,31 +1,36 @@
 import { useState, useEffect } from 'react';
+import { useAuth } from '../../context/AuthContext';
 import StatsCard from '../../components/ui/StatsCard';
-import CourseCard from '../../components/ui/CourseCard';
+import Card from '../../components/ui/Card';
+import PageHeader from '../../components/ui/PageHeader';
 import api from '../../config/api';
 import {
   HiOutlineBookOpen,
-  HiOutlineAcademicCap,
   HiOutlineClipboardList,
   HiOutlineCalendar,
-  HiOutlineClock,
+  HiOutlineAcademicCap,
 } from 'react-icons/hi';
 
 const StudentDashboard = () => {
+  const { user } = useAuth();
   const [enrolledCourses, setEnrolledCourses] = useState([]);
-  const [upcomingClasses, setUpcomingClasses] = useState([]);
+  const [todayClasses, setTodayClasses] = useState([]);
   const [assignments, setAssignments] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchData = async () => {
+    const fetchDashboardData = async () => {
       try {
-        const [coursesRes, classesRes, assignmentsRes] = await Promise.all([
-          api.get('/courses').catch(() => ({ data: [] })),
-          api.get('/classes').catch(() => ({ data: [] })),
-          api.get('/assignments').catch(() => ({ data: [] })),
-        ]);
-        setEnrolledCourses(coursesRes.data || []);
-        setUpcomingClasses(classesRes.data || []);
+        // Fetch enrolled courses
+        const enrollmentsRes = await api.get('/enrollments/my-enrollments').catch(() => ({ data: [] }));
+        setEnrolledCourses(enrollmentsRes.data || []);
+
+        // Fetch today's classes
+        const classesRes = await api.get('/classes/today').catch(() => ({ data: [] }));
+        setTodayClasses(classesRes.data || []);
+
+        // Fetch pending assignments
+        const assignmentsRes = await api.get('/assignments/my-assignments').catch(() => ({ data: [] }));
         setAssignments(assignmentsRes.data || []);
       } catch (error) {
         console.error('Error fetching dashboard data:', error);
@@ -33,95 +38,131 @@ const StudentDashboard = () => {
         setLoading(false);
       }
     };
-    fetchData();
+    fetchDashboardData();
   }, []);
 
-  const pendingAssignments = assignments.filter(a => a.status !== 'submitted');
+  const pendingAssignments = assignments.filter(a => !a.submitted);
 
   const stats = [
-    { title: 'Enrolled Courses', value: enrolledCourses.length.toString(), change: 0, icon: HiOutlineBookOpen, color: 'primary' },
-    { title: 'Completed Classes', value: '0', change: 0, icon: HiOutlineAcademicCap, color: 'success' },
-    { title: 'Pending Assignments', value: pendingAssignments.length.toString(), change: 0, icon: HiOutlineClipboardList, color: 'warning' },
-    { title: 'Attendance Rate', value: 'N/A', change: 0, icon: HiOutlineCalendar, color: 'info' },
+    { title: 'Enrolled Courses', value: enrolledCourses.length.toString(), icon: HiOutlineBookOpen, color: 'primary' },
+    { title: 'Pending Assignments', value: pendingAssignments.length.toString(), icon: HiOutlineClipboardList, color: 'warning' },
+    { title: 'Classes Today', value: todayClasses.length.toString(), icon: HiOutlineCalendar, color: 'success' },
+    { title: 'Overall Grade', value: 'N/A', icon: HiOutlineAcademicCap, color: 'info' },
   ];
+
+  if (loading) {
+    return (
+      <div className="space-y-6">
+        <PageHeader
+          title={`Welcome, ${user?.name || 'Student'}`}
+          subtitle="Loading your academic overview..."
+        />
+        <div className="flex items-center justify-center py-12">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-brand-primary"></div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold text-white">Student Dashboard</h1>
-        <p className="text-text-secondary mt-1">Track your learning progress.</p>
-      </div>
+      <PageHeader
+        title={`Welcome, ${user?.name || 'Student'}`}
+        subtitle="Here's your academic overview for today."
+      />
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
         {stats.map((stat, i) => (
           <StatsCard key={i} {...stat} />
         ))}
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Upcoming Classes */}
-        <div className="lg:col-span-2 bg-surface-card rounded-2xl p-6 border border-navy-600/20">
-          <h2 className="text-lg font-semibold text-white mb-5">Upcoming Classes</h2>
-          {upcomingClasses.length === 0 ? (
-            <p className="text-text-muted text-sm">No upcoming classes scheduled.</p>
-          ) : (
-            <div className="space-y-3">
-              {upcomingClasses.map((cls) => (
-                <div key={cls.id} className="flex items-center gap-4 p-4 rounded-xl bg-navy-700/50 hover:bg-navy-700 transition-colors">
-                  <div className="w-12 h-12 rounded-xl gradient-primary flex items-center justify-center flex-shrink-0">
-                    <HiOutlineClock className="w-5 h-5 text-white" />
+        {/* Today's Schedule */}
+        <div className="lg:col-span-2">
+          <Card>
+            <h2 className="text-lg font-semibold text-navy-800 mb-4">Today's Schedule</h2>
+            {todayClasses.length > 0 ? (
+              <div className="space-y-3">
+                {todayClasses.map((item) => (
+                  <div
+                    key={item.id}
+                    className="flex items-center justify-between p-4 rounded-xl bg-surface-bg border border-surface-border"
+                  >
+                    <div className="flex items-center gap-4">
+                      <div className="w-12 h-12 rounded-xl bg-brand-light flex items-center justify-center">
+                        <HiOutlineBookOpen className="w-6 h-6 text-brand-primary" />
+                      </div>
+                      <div>
+                        <p className="font-semibold text-navy-800 text-sm">{item.courseName || item.title}</p>
+                        <p className="text-xs text-text-muted">
+                          {item.teacherName || 'Instructor'} {item.room && `• ${item.room}`}
+                        </p>
+                      </div>
+                    </div>
+                    <span className="text-sm font-medium text-navy-600 bg-surface-bg px-3 py-1 rounded-lg">
+                      {item.startTime || 'TBD'}
+                    </span>
                   </div>
-                  <div className="flex-1">
-                    <h3 className="text-sm font-medium text-white">{cls.title}</h3>
-                    <p className="text-xs text-text-muted">{cls.courseId}</p>
-                  </div>
-                  <div className="text-right">
-                    <p className="text-sm text-white">{cls.time}</p>
-                    <p className="text-xs text-text-muted">{cls.date}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-12">
+                <HiOutlineCalendar className="mx-auto h-12 w-12 text-text-muted mb-3" />
+                <p className="text-text-muted">No classes scheduled for today</p>
+                <p className="text-sm text-text-muted mt-1">Check your calendar for upcoming sessions</p>
+              </div>
+            )}
+          </Card>
         </div>
 
         {/* Pending Assignments */}
-        <div className="bg-surface-card rounded-2xl p-6 border border-navy-600/20">
-          <h2 className="text-lg font-semibold text-white mb-5">Assignments</h2>
-          {assignments.length === 0 ? (
-            <p className="text-text-muted text-sm">No assignments yet.</p>
-          ) : (
+        <Card>
+          <h2 className="text-lg font-semibold text-navy-800 mb-4">Pending Assignments</h2>
+          {pendingAssignments.length > 0 ? (
             <div className="space-y-3">
-              {assignments.map((a) => (
-                <div key={a.id} className="p-3 rounded-xl bg-navy-700/50">
-                  <div className="flex items-center justify-between mb-1">
-                    <p className="text-sm font-medium text-white">{a.title}</p>
-                    <span className={`px-2 py-0.5 rounded-full text-xs font-medium
-                      ${a.status === 'submitted' ? 'bg-success/20 text-success' : 'bg-warning/20 text-warning'}`}>
-                      {a.status || 'pending'}
+              {pendingAssignments.slice(0, 3).map((a) => (
+                <div key={a.id} className="p-3 rounded-xl bg-surface-bg border border-surface-border">
+                  <p className="font-medium text-navy-800 text-sm">{a.title}</p>
+                  <p className="text-xs text-text-muted mt-1">{a.courseName}</p>
+                  <div className="flex items-center justify-between mt-2">
+                    <span className="text-xs text-text-muted">Due: {new Date(a.dueDate).toLocaleDateString()}</span>
+                    <span className="text-xs px-2 py-0.5 rounded-full font-medium bg-red-50 text-error">
+                      Pending
                     </span>
                   </div>
-                  <p className="text-xs text-text-muted">Due: {a.dueDate || 'N/A'}</p>
                 </div>
               ))}
             </div>
+          ) : (
+            <div className="text-center py-12">
+              <HiOutlineClipboardList className="mx-auto h-12 w-12 text-text-muted mb-3" />
+              <p className="text-text-muted">No pending assignments</p>
+              <p className="text-sm text-text-muted mt-1">You're all caught up!</p>
+            </div>
           )}
-        </div>
+        </Card>
       </div>
 
-      {/* My Courses */}
-      <div>
-        <h2 className="text-lg font-semibold text-white mb-5">My Courses</h2>
-        {enrolledCourses.length === 0 ? (
-          <p className="text-text-muted text-sm">No courses enrolled yet. Start exploring courses!</p>
-        ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {enrolledCourses.map((course) => (
-              <CourseCard key={course.id} course={course} />
-            ))}
+      {/* Getting Started */}
+      {enrolledCourses.length === 0 && (
+        <Card>
+          <h2 className="text-lg font-semibold text-navy-800 mb-4">Get Started</h2>
+          <div className="text-center py-8">
+            <HiOutlineAcademicCap className="mx-auto h-16 w-16 text-brand-primary mb-4" />
+            <h3 className="text-lg font-semibold text-navy-800 mb-2">Welcome to Skill Nest!</h3>
+            <p className="text-text-muted mb-6 max-w-md mx-auto">
+              Start your learning journey by enrolling in courses. Browse available courses to get started.
+            </p>
+            <a
+              href="/courses"
+              className="inline-flex items-center px-6 py-3 bg-brand-primary text-white rounded-xl font-medium hover:bg-brand-dark transition-colors"
+            >
+              Browse Courses
+            </a>
           </div>
-        )}
-      </div>
+        </Card>
+      )}
     </div>
   );
 };

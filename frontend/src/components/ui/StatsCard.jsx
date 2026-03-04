@@ -1,27 +1,51 @@
+const colorMap = {
+  primary: {
+    bg: 'bg-brand-light',
+    icon: 'bg-brand-primary',
+    text: 'text-brand-primary',
+  },
+  success: {
+    bg: 'bg-green-50',
+    icon: 'bg-success',
+    text: 'text-success',
+  },
+  warning: {
+    bg: 'bg-amber-50',
+    icon: 'bg-warning',
+    text: 'text-warning',
+  },
+  info: {
+    bg: 'bg-blue-50',
+    icon: 'bg-info',
+    text: 'text-info',
+  },
+  error: {
+    bg: 'bg-red-50',
+    icon: 'bg-error',
+    text: 'text-error',
+  },
+};
+
 const StatsCard = ({ title, value, change, icon: Icon, color = 'primary' }) => {
-  const colorClasses = {
-    primary: 'from-brand-primary to-brand-secondary',
-    success: 'from-success to-emerald-400',
-    warning: 'from-warning to-orange-400',
-    error: 'from-error to-rose-400',
-    info: 'from-info to-blue-400',
-  };
+  const palette = colorMap[color] || colorMap.primary;
+  const isPositive = change > 0;
 
   return (
-    <div className="bg-surface-card rounded-2xl p-6 border border-navy-600/20 hover:border-navy-600/40 transition-all duration-300">
+    <div className="bg-white rounded-2xl p-5 card-shadow border border-surface-border">
       <div className="flex items-center justify-between">
         <div>
-          <p className="text-sm text-text-secondary mb-1">{title}</p>
-          <h3 className="text-2xl font-bold text-white">{value}</h3>
-          {change && (
-            <p className={`text-xs mt-1 ${change > 0 ? 'text-success' : 'text-error'}`}>
-              {change > 0 ? '+' : ''}{change}% from last month
+          <p className="text-sm text-text-muted font-medium">{title}</p>
+          <p className="text-2xl font-bold text-navy-800 mt-1">{value}</p>
+          {change !== undefined && change !== 0 && (
+            <p className={`text-xs mt-1 font-medium ${isPositive ? 'text-success' : 'text-error'}`}>
+              {isPositive ? '+' : ''}{change}%{' '}
+              <span className="text-text-muted">from last month</span>
             </p>
           )}
         </div>
         {Icon && (
-          <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${colorClasses[color]} flex items-center justify-center`}>
-            <Icon className="w-6 h-6 text-white" />
+          <div className={`w-14 h-14 rounded-2xl ${palette.bg} flex items-center justify-center`}>
+            <Icon className={`w-7 h-7 ${palette.text}`} />
           </div>
         )}
       </div>

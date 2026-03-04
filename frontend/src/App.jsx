@@ -1,69 +1,93 @@
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import { Toaster } from 'react-hot-toast';
-import { AuthProvider } from './context/AuthContext';
+import { Routes, Route, Navigate } from 'react-router-dom';
+import { useAuth } from './context/AuthContext';
 import ProtectedRoute from './components/auth/ProtectedRoute';
 import DashboardLayout from './components/layout/DashboardLayout';
-import Login from './pages/auth/Login';
-import Register from './pages/auth/Register';
-import Dashboard from './pages/dashboard/Dashboard';
-import Courses from './pages/courses/Courses';
-import Classes from './pages/classes/Classes';
-import Assignments from './pages/assignments/Assignments';
-import CalendarPage from './pages/calendar/Calendar';
-import Settings from './pages/settings/Settings';
-import Students from './pages/students/Students';
-import Attendance from './pages/attendance/Attendance';
-import Materials from './pages/materials/Materials';
-import Earnings from './pages/earnings/Earnings';
+import LoginPage from './pages/auth/LoginPage';
+import RegisterPage from './pages/auth/RegisterPage';
+import AdminDashboard from './pages/dashboard/AdminDashboard';
+import TeacherDashboard from './pages/dashboard/TeacherDashboard';
+import StudentDashboard from './pages/dashboard/StudentDashboard';
+import CoursesPage from './pages/courses/CoursesPage';
+import AssignmentsPage from './pages/assignments/AssignmentsPage';
+import AttendancePage from './pages/attendance/AttendancePage';
+import CalendarPage from './pages/calendar/CalendarPage';
+import ClassesPage from './pages/classes/ClassesPage';
+import StudentsPage from './pages/students/StudentsPage';
+import MaterialsPage from './pages/materials/MaterialsPage';
+import EarningsPage from './pages/earnings/EarningsPage';
+import SettingsPage from './pages/settings/SettingsPage';
+
+const DashboardRedirect = () => {
+  const { user } = useAuth();
+  if (user?.role === 'admin') return <Navigate to="/admin/dashboard" replace />;
+  if (user?.role === 'teacher') return <Navigate to="/teacher/dashboard" replace />;
+  return <Navigate to="/student/dashboard" replace />;
+};
 
 function App() {
   return (
-    <AuthProvider>
-      <Router>
-        <Toaster
-          position="top-right"
-          toastOptions={{
-            style: {
-              background: '#1B254B',
-              color: '#FFFFFF',
-              border: '1px solid rgba(27, 37, 89, 0.3)',
-            },
-          }}
+    <Routes>
+      {/* Public */}
+      <Route path="/login" element={<LoginPage />} />
+      <Route path="/register" element={<RegisterPage />} />
+
+      {/* Protected – wrapped by layout */}
+      <Route
+        path="/"
+        element={
+          <ProtectedRoute>
+            <DashboardLayout />
+          </ProtectedRoute>
+        }
+      >
+        <Route index element={<DashboardRedirect />} />
+        <Route path="dashboard" element={<DashboardRedirect />} />
+
+        {/* Admin */}
+        <Route
+          path="admin/dashboard"
+          element={
+            <ProtectedRoute allowedRoles={['admin']}>
+              <AdminDashboard />
+            </ProtectedRoute>
+          }
         />
-        <Routes>
-          {/* Public Routes */}
-          <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />
 
-          {/* Protected Routes */}
-          <Route
-            path="/"
-            element={
-              <ProtectedRoute>
-                <DashboardLayout />
-              </ProtectedRoute>
-            }
-          >
-            <Route index element={<Navigate to="/dashboard" replace />} />
-            <Route path="dashboard" element={<Dashboard />} />
-            <Route path="courses" element={<Courses />} />
-            <Route path="classes" element={<Classes />} />
-            <Route path="assignments" element={<Assignments />} />
-            <Route path="calendar" element={<CalendarPage />} />
-            <Route path="settings" element={<Settings />} />
-            <Route path="students" element={<Students />} />
-            <Route path="attendance" element={<Attendance />} />
-            <Route path="materials" element={<Materials />} />
-            <Route path="earnings" element={<Earnings />} />
-            <Route path="users" element={<Students />} />
-            <Route path="analytics" element={<Dashboard />} />
-          </Route>
+        {/* Teacher */}
+        <Route
+          path="teacher/dashboard"
+          element={
+            <ProtectedRoute allowedRoles={['teacher']}>
+              <TeacherDashboard />
+            </ProtectedRoute>
+          }
+        />
 
-          {/* Catch-all */}
-          <Route path="*" element={<Navigate to="/login" replace />} />
-        </Routes>
-      </Router>
-    </AuthProvider>
+        {/* Student */}
+        <Route
+          path="student/dashboard"
+          element={
+            <ProtectedRoute allowedRoles={['student']}>
+              <StudentDashboard />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Shared pages */}
+        <Route path="courses" element={<CoursesPage />} />
+        <Route path="assignments" element={<AssignmentsPage />} />
+        <Route path="attendance" element={<AttendancePage />} />
+        <Route path="calendar" element={<CalendarPage />} />
+        <Route path="classes" element={<ClassesPage />} />
+        <Route path="students" element={<StudentsPage />} />
+        <Route path="materials" element={<MaterialsPage />} />
+        <Route path="earnings" element={<EarningsPage />} />
+        <Route path="settings" element={<SettingsPage />} />
+      </Route>
+
+      {/* Fallback */}
+      <Route path="*" element={<Navigate to="/dashboard" replace />} />
+    </Routes>
   );
 }
 

@@ -1,35 +1,42 @@
 @import "tailwindcss";
 
 @theme {
-  --color-navy-50: #e8eaf6;
-  --color-navy-100: #c5cae9;
-  --color-navy-200: #9fa8da;
-  --color-navy-300: #7986cb;
-  --color-navy-400: #5c6bc0;
-  --color-navy-500: #3f51b5;
-  --color-navy-600: #1B2559;
-  --color-navy-700: #111C44;
-  --color-navy-800: #0B1437;
-  --color-navy-900: #060B28;
+  /* Navy / Dark tones (for sidebar & text) */
+  --color-navy-50: #F4F7FE;
+  --color-navy-100: #E9EDF7;
+  --color-navy-200: #D5DBE8;
+  --color-navy-300: #A3AED0;
+  --color-navy-400: #707EAE;
+  --color-navy-500: #4A5568;
+  --color-navy-600: #2B3674;
+  --color-navy-700: #1B2559;
+  --color-navy-800: #111C44;
+  --color-navy-900: #0B1437;
 
+  /* Brand / Primary */
   --color-brand-primary: #4318FF;
   --color-brand-secondary: #7551FF;
   --color-brand-accent: #868CFF;
   --color-brand-light: #E9E3FF;
 
+  /* Status colors */
   --color-success: #01B574;
   --color-warning: #FFB547;
   --color-error: #E31A1A;
   --color-info: #2196F3;
 
-  --color-surface-dark: #111C44;
-  --color-surface-darker: #0B1437;
-  --color-surface-card: #1B254B;
-  --color-surface-hover: #2D3748;
+  /* Surfaces – light theme */
+  --color-surface-bg: #F4F7FE;
+  --color-surface-card: #FFFFFF;
+  --color-surface-sidebar: #FFFFFF;
+  --color-surface-hover: #F0F2F9;
+  --color-surface-border: #E9EDF7;
 
-  --color-text-primary: #FFFFFF;
+  /* Text – light theme */
+  --color-text-primary: #2B3674;
   --color-text-secondary: #A3AED0;
   --color-text-muted: #707EAE;
+  --color-text-dark: #1B2559;
 }
 
 * {
@@ -40,8 +47,8 @@
 
 body {
   font-family: 'DM Sans', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-  background-color: #0B1437;
-  color: #FFFFFF;
+  background-color: #F4F7FE;
+  color: #2B3674;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
@@ -50,20 +57,20 @@ body {
   width: 6px;
 }
 ::-webkit-scrollbar-track {
-  background: #0B1437;
+  background: #F4F7FE;
 }
 ::-webkit-scrollbar-thumb {
-  background: #1B254B;
+  background: #D5DBE8;
   border-radius: 3px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #2D3748;
+  background: #A3AED0;
 }
 
 .glass-card {
-  background: rgba(27, 37, 75, 0.7);
+  background: rgba(255, 255, 255, 0.85);
   backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(0, 0, 0, 0.06);
 }
 
 .gradient-primary {
@@ -82,4 +89,9 @@ body {
   background: linear-gradient(135deg, #4318FF 0%, #7551FF 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
+}
+
+/* Utility: card shadow */
+.card-shadow {
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.05);
 }

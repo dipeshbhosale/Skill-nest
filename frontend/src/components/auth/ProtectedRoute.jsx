@@ -6,7 +6,7 @@ const ProtectedRoute = ({ children, allowedRoles }) => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-navy-900 flex items-center justify-center">
+      <div className="min-h-screen bg-surface-bg flex items-center justify-center">
         <div className="w-12 h-12 border-4 border-brand-primary border-t-transparent rounded-full animate-spin" />
       </div>
     );

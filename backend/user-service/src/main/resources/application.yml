@@ -13,7 +13,7 @@ jwt:
 # Firebase Configuration
 firebase:
   config-path: classpath:firebase-service-account.json
-  database-url: https://skill-nest-dccb0.firebaseio.com
+  database-url: https://tick-c8465-default-rtdb.firebaseio.com
   credentials-base64: ${FIREBASE_CREDENTIALS_BASE64:}
 
 # CORS

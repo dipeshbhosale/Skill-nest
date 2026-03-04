@@ -1,114 +1,137 @@
-import { NavLink, useLocation } from 'react-router-dom';
+import { NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import {
-  HiOutlineHome,
+  HiOutlineViewGrid,
   HiOutlineBookOpen,
-  HiOutlineAcademicCap,
-  HiOutlineCalendar,
   HiOutlineClipboardList,
-  HiOutlineUsers,
-  HiOutlineCog,
-  HiOutlineCurrencyDollar,
-  HiOutlineDocumentText,
-  HiOutlineChartBar,
-  HiOutlineLogout,
+  HiOutlineCalendar,
   HiOutlineUserGroup,
+  HiOutlineAcademicCap,
+  HiOutlineFolder,
+  HiOutlineCurrencyDollar,
+  HiOutlineCog,
+  HiOutlineLogout,
+  HiX,
 } from 'react-icons/hi';
 
-const Sidebar = ({ isOpen, onClose }) => {
-  const { user, logout, isAdmin, isTeacher, isStudent } = useAuth();
-  const location = useLocation();
+const Sidebar = ({ open, onClose }) => {
+  const { user, logout } = useAuth();
+  const navigate = useNavigate();
 
-  const teacherLinks = [
-    { to: '/dashboard', icon: HiOutlineHome, label: 'Dashboard' },
-    { to: '/courses', icon: HiOutlineBookOpen, label: 'My Courses' },
-    { to: '/classes', icon: HiOutlineAcademicCap, label: 'Classes' },
-    { to: '/assignments', icon: HiOutlineClipboardList, label: 'Assignments' },
-    { to: '/students', icon: HiOutlineUsers, label: 'Students' },
-    { to: '/attendance', icon: HiOutlineDocumentText, label: 'Attendance' },
-    { to: '/materials', icon: HiOutlineDocumentText, label: 'Materials' },
-    { to: '/calendar', icon: HiOutlineCalendar, label: 'Calendar' },
-    { to: '/earnings', icon: HiOutlineCurrencyDollar, label: 'Earnings' },
-    { to: '/settings', icon: HiOutlineCog, label: 'Settings' },
+  const getDashboardPath = () => {
+    if (user?.role === 'admin') return '/admin/dashboard';
+    if (user?.role === 'teacher') return '/teacher/dashboard';
+    return '/student/dashboard';
+  };
+
+  const navItems = [
+    { label: 'Dashboard', icon: HiOutlineViewGrid, path: getDashboardPath() },
+    { label: 'Courses', icon: HiOutlineBookOpen, path: '/courses' },
+    { label: 'Assignments', icon: HiOutlineClipboardList, path: '/assignments' },
+    { label: 'Attendance', icon: HiOutlineCalendar, path: '/attendance' },
+    { label: 'Calendar', icon: HiOutlineCalendar, path: '/calendar' },
+    { label: 'Classes', icon: HiOutlineAcademicCap, path: '/classes' },
+    ...(user?.role === 'admin' || user?.role === 'teacher'
+      ? [{ label: 'Students', icon: HiOutlineUserGroup, path: '/students' }]
+      : []),
+    { label: 'Materials', icon: HiOutlineFolder, path: '/materials' },
+    ...(user?.role === 'admin' || user?.role === 'teacher'
+      ? [{ label: 'Earnings', icon: HiOutlineCurrencyDollar, path: '/earnings' }]
+      : []),
+    { label: 'Settings', icon: HiOutlineCog, path: '/settings' },
   ];
 
-  const studentLinks = [
-    { to: '/dashboard', icon: HiOutlineHome, label: 'Dashboard' },
-    { to: '/courses', icon: HiOutlineBookOpen, label: 'My Courses' },
-    { to: '/classes', icon: HiOutlineAcademicCap, label: 'Classes' },
-    { to: '/assignments', icon: HiOutlineClipboardList, label: 'Assignments' },
-    { to: '/materials', icon: HiOutlineDocumentText, label: 'Materials' },
-    { to: '/calendar', icon: HiOutlineCalendar, label: 'Calendar' },
-    { to: '/settings', icon: HiOutlineCog, label: 'Settings' },
-  ];
+  const handleLogout = async () => {
+    await logout();
+    navigate('/login');
+  };
 
-  const adminLinks = [
-    { to: '/dashboard', icon: HiOutlineHome, label: 'Dashboard' },
-    { to: '/users', icon: HiOutlineUserGroup, label: 'Users' },
-    { to: '/courses', icon: HiOutlineBookOpen, label: 'Courses' },
-    { to: '/analytics', icon: HiOutlineChartBar, label: 'Analytics' },
-    { to: '/settings', icon: HiOutlineCog, label: 'Settings' },
-  ];
-
-  const links = isAdmin ? adminLinks : isTeacher ? teacherLinks : studentLinks;
+  const linkClasses = ({ isActive }) =>
+    `flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200 ${
+      isActive
+        ? 'bg-brand-primary text-white shadow-md shadow-brand-primary/25'
+        : 'text-navy-400 hover:bg-surface-hover hover:text-navy-700'
+    }`;
 
   return (
     <>
       {/* Mobile overlay */}
-      {isOpen && (
+      {open && (
         <div
-          className="fixed inset-0 bg-black/50 z-40 lg:hidden"
+          className="fixed inset-0 bg-black/30 z-40 lg:hidden"
           onClick={onClose}
         />
       )}
 
       {/* Sidebar */}
       <aside
-        className={`fixed top-0 left-0 h-full w-[280px] bg-navy-800 border-r border-navy-600/30 z-50 transform transition-transform duration-300 ease-in-out
-          ${isOpen ? 'translate-x-0' : '-translate-x-full'} lg:translate-x-0`}
+        className={`
+          fixed lg:static inset-y-0 left-0 z-50
+          w-[280px] bg-white border-r border-surface-border
+          flex flex-col
+          transform transition-transform duration-300 ease-in-out
+          ${open ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
+        `}
       >
         {/* Logo */}
-        <div className="flex items-center gap-3 px-6 py-6 border-b border-navy-600/30">
-          <div className="w-10 h-10 rounded-xl gradient-primary flex items-center justify-center">
-            <HiOutlineBookOpen className="w-6 h-6 text-white" />
+        <div className="flex items-center justify-between px-6 h-20 border-b border-surface-border">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl gradient-primary flex items-center justify-center">
+              <span className="text-white text-lg font-bold">S</span>
+            </div>
+            <div>
+              <h1 className="text-lg font-bold text-navy-800">Skill Nest</h1>
+              <p className="text-xs text-text-muted">Education Platform</p>
+            </div>
           </div>
-          <div>
-            <h1 className="text-lg font-bold text-white">Skill Nest</h1>
-            <p className="text-xs text-text-muted capitalize">{user?.role || 'Platform'}</p>
-          </div>
+          <button
+            onClick={onClose}
+            className="lg:hidden p-1 rounded-lg hover:bg-surface-hover"
+          >
+            <HiX className="w-5 h-5 text-navy-400" />
+          </button>
         </div>
 
-        {/* Navigation Links */}
-        <nav className="flex-1 px-4 py-4 space-y-1 overflow-y-auto max-h-[calc(100vh-180px)]">
-          {links.map((link) => {
-            const isActive = location.pathname === link.to;
-            return (
-              <NavLink
-                key={link.to}
-                to={link.to}
-                onClick={onClose}
-                className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200
-                  ${isActive
-                    ? 'gradient-primary text-white shadow-lg shadow-brand-primary/25'
-                    : 'text-text-secondary hover:text-white hover:bg-navy-700/50'
-                  }`}
-              >
-                <link.icon className="w-5 h-5" />
-                {link.label}
-              </NavLink>
-            );
-          })}
+        {/* Navigation */}
+        <nav className="flex-1 px-4 py-6 space-y-1 overflow-y-auto">
+          <p className="px-4 mb-3 text-xs font-semibold text-text-muted uppercase tracking-wider">
+            Menu
+          </p>
+          {navItems.map((item) => (
+            <NavLink
+              key={item.path}
+              to={item.path}
+              className={linkClasses}
+              onClick={onClose}
+            >
+              <item.icon className="w-5 h-5 flex-shrink-0" />
+              {item.label}
+            </NavLink>
+          ))}
         </nav>
 
-        {/* Logout */}
-        <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-navy-600/30">
-          <button
-            onClick={logout}
-            className="flex items-center gap-3 w-full px-4 py-3 rounded-xl text-sm font-medium text-text-secondary hover:text-error hover:bg-error/10 transition-all duration-200"
-          >
-            <HiOutlineLogout className="w-5 h-5" />
-            Logout
-          </button>
+        {/* User section */}
+        <div className="p-4 border-t border-surface-border">
+          <div className="flex items-center gap-3 px-4 py-3 rounded-xl bg-surface-bg">
+            <div className="w-10 h-10 rounded-full bg-brand-light flex items-center justify-center">
+              <span className="text-sm font-bold text-brand-primary">
+                {user?.name?.[0]?.toUpperCase() || 'U'}
+              </span>
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-semibold text-navy-700 truncate">
+                {user?.name || 'User'}
+              </p>
+              <p className="text-xs text-text-muted capitalize">{user?.role || 'student'}</p>
+            </div>
+            <button
+              onClick={handleLogout}
+              className="p-2 rounded-lg hover:bg-white text-navy-400 hover:text-error transition-colors"
+              title="Logout"
+            >
+              <HiOutlineLogout className="w-5 h-5" />
+            </button>
+          </div>
         </div>
       </aside>
     </>

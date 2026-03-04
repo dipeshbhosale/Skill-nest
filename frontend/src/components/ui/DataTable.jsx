@@ -1,18 +1,18 @@
-const DataTable = ({ columns, data, onRowClick, emptyMessage = 'No data found' }) => {
+const DataTable = ({ columns, data, emptyMessage = 'No data available.' }) => {
   if (!data || data.length === 0) {
     return (
-      <div className="bg-surface-card rounded-2xl p-8 text-center border border-navy-600/20">
-        <p className="text-text-muted">{emptyMessage}</p>
+      <div className="bg-white rounded-2xl border border-surface-border p-8 text-center">
+        <p className="text-text-muted text-sm">{emptyMessage}</p>
       </div>
     );
   }
 
   return (
-    <div className="bg-surface-card rounded-2xl border border-navy-600/20 overflow-hidden">
+    <div className="bg-white rounded-2xl border border-surface-border overflow-hidden card-shadow">
       <div className="overflow-x-auto">
         <table className="w-full">
           <thead>
-            <tr className="border-b border-navy-600/20">
+            <tr className="border-b border-surface-border">
               {columns.map((col, i) => (
                 <th
                   key={i}
@@ -23,15 +23,14 @@ const DataTable = ({ columns, data, onRowClick, emptyMessage = 'No data found' }
               ))}
             </tr>
           </thead>
-          <tbody>
-            {data.map((row, rowIndex) => (
+          <tbody className="divide-y divide-surface-border">
+            {data.map((row, rowIdx) => (
               <tr
-                key={row.id || rowIndex}
-                onClick={() => onRowClick?.(row)}
-                className={`border-b border-navy-600/10 hover:bg-navy-700/30 transition-colors ${onRowClick ? 'cursor-pointer' : ''}`}
+                key={row.id || rowIdx}
+                className="hover:bg-surface-bg transition-colors"
               >
-                {columns.map((col, colIndex) => (
-                  <td key={colIndex} className="px-6 py-4 text-sm text-text-secondary">
+                {columns.map((col, colIdx) => (
+                  <td key={colIdx} className="px-6 py-4 text-sm text-navy-600">
                     {col.render ? col.render(row) : row[col.accessor]}
                   </td>
                 ))}
