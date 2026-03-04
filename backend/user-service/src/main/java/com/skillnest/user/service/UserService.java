@@ -31,50 +31,6 @@ public class UserService {
     private final Map<String, TeacherProfile> demoTeacherProfiles = new ConcurrentHashMap<>();
     private final Map<String, StudentProfile> demoStudentProfiles = new ConcurrentHashMap<>();
 
-    // Initialize demo data
-    {
-        User admin = new User();
-        admin.setId("demo-admin-001");
-        admin.setName("Admin User");
-        admin.setEmail("admin@skillnest.com");
-        admin.setRole("admin");
-        admin.setStatus("active");
-        admin.setCreatedAt(System.currentTimeMillis());
-        demoUsers.put(admin.getId(), admin);
-
-        User teacher = new User();
-        teacher.setId("demo-teacher-001");
-        teacher.setName("Prof. Smith");
-        teacher.setEmail("teacher@skillnest.com");
-        teacher.setRole("teacher");
-        teacher.setStatus("active");
-        teacher.setCreatedAt(System.currentTimeMillis());
-        demoUsers.put(teacher.getId(), teacher);
-
-        User student = new User();
-        student.setId("demo-student-001");
-        student.setName("John Doe");
-        student.setEmail("student@skillnest.com");
-        student.setRole("student");
-        student.setStatus("active");
-        student.setCreatedAt(System.currentTimeMillis());
-        demoUsers.put(student.getId(), student);
-
-        TeacherProfile teacherProfile = new TeacherProfile();
-        teacherProfile.setUserId("demo-teacher-001");
-        teacherProfile.setSpecializations(List.of("Computer Science", "Java Programming"));
-        teacherProfile.setQualifications("PhD in Computer Science");
-        teacherProfile.setBio("Experienced professor with 10+ years of teaching");
-        teacherProfile.setPerClassRate(50.0);
-        demoTeacherProfiles.put("demo-teacher-001", teacherProfile);
-
-        StudentProfile studentProfile = new StudentProfile();
-        studentProfile.setUserId("demo-student-001");
-        studentProfile.setGradeLevel("Undergraduate");
-        studentProfile.setInterests(List.of("Programming", "Web Development"));
-        demoStudentProfiles.put("demo-student-001", studentProfile);
-    }
-
     private boolean isDemoMode() {
         return firestore == null;
     }

@@ -25,19 +25,6 @@ public class MaterialService {
     // In-memory store for demo mode
     private final Map<String, Material> demoMaterials = new ConcurrentHashMap<>();
 
-    // Initialize demo materials
-    {
-        Material m1 = new Material();
-        m1.setId("demo-material-001");
-        m1.setCourseId("demo-course-001");
-        m1.setTitle("Java Programming Guide");
-        m1.setType("pdf");
-        m1.setFileUrl("https://example.com/java-guide.pdf");
-        m1.setDownloads(25);
-        m1.setUploadedAt(System.currentTimeMillis());
-        demoMaterials.put(m1.getId(), m1);
-    }
-
     private boolean isDemoMode() {
         return firestore == null;
     }

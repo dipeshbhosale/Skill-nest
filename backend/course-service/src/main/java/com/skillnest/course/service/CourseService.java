@@ -25,35 +25,6 @@ public class CourseService {
     // In-memory store for demo mode
     private final Map<String, Course> demoCourses = new ConcurrentHashMap<>();
 
-    // Initialize demo courses
-    {
-        Course course1 = new Course();
-        course1.setId("demo-course-001");
-        course1.setTitle("Introduction to Programming");
-        course1.setDescription("Learn the basics of programming with Java");
-        course1.setTeacherId("demo-teacher-001");
-        course1.setTeacherName("Prof. Smith");
-        course1.setCategory("Programming");
-        course1.setEnrolledStudents(15);
-        course1.setTotalClasses(24);
-        course1.setStatus("active");
-        course1.setCreatedAt(System.currentTimeMillis());
-        demoCourses.put(course1.getId(), course1);
-
-        Course course2 = new Course();
-        course2.setId("demo-course-002");
-        course2.setTitle("Web Development Fundamentals");
-        course2.setDescription("Build modern web applications");
-        course2.setTeacherId("demo-teacher-001");
-        course2.setTeacherName("Prof. Smith");
-        course2.setCategory("Web Development");
-        course2.setEnrolledStudents(20);
-        course2.setTotalClasses(36);
-        course2.setStatus("active");
-        course2.setCreatedAt(System.currentTimeMillis());
-        demoCourses.put(course2.getId(), course2);
-    }
-
     private boolean isDemoMode() {
         return firestore == null;
     }

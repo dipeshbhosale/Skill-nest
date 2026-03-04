@@ -25,20 +25,6 @@ public class CalendarEventService {
     // In-memory store for demo mode
     private final Map<String, CalendarEvent> demoEvents = new ConcurrentHashMap<>();
 
-    // Initialize demo events
-    {
-        CalendarEvent e1 = new CalendarEvent();
-        e1.setId("demo-event-001");
-        e1.setUserId("demo-teacher-001");
-        e1.setCourseId("demo-course-001");
-        e1.setTitle("Java Class - Introduction to Variables");
-        e1.setDate("2026-03-05");
-        e1.setTime("10:00");
-        e1.setType("class");
-        e1.setColor("#4F46E5");
-        demoEvents.put(e1.getId(), e1);
-    }
-
     private boolean isDemoMode() {
         return firestore == null;
     }

@@ -28,18 +28,6 @@ public class EnrollmentService {
     // In-memory store for demo mode
     private final Map<String, Enrollment> demoEnrollments = new ConcurrentHashMap<>();
 
-    // Initialize demo enrollments
-    {
-        Enrollment e1 = new Enrollment();
-        e1.setId("demo-enrollment-001");
-        e1.setCourseId("demo-course-001");
-        e1.setStudentId("demo-student-001");
-        e1.setEnrolledAt(System.currentTimeMillis());
-        e1.setProgress(25.0);
-        e1.setStatus("active");
-        demoEnrollments.put(e1.getId(), e1);
-    }
-
     private boolean isDemoMode() {
         return firestore == null;
     }

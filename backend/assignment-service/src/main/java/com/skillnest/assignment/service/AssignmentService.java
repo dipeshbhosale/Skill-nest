@@ -26,37 +26,6 @@ public class AssignmentService {
     // In-memory store for demo mode
     private final Map<String, Assignment> demoAssignments = new ConcurrentHashMap<>();
 
-    // Initialize demo assignments
-    {
-        Assignment a1 = new Assignment();
-        a1.setId("demo-assignment-001");
-        a1.setTitle("Java Basics Quiz");
-        a1.setDescription("Complete the quiz on Java fundamentals");
-        a1.setCourseId("demo-course-001");
-        a1.setCreatedBy("demo-teacher-001");
-        a1.setDueDate("2026-03-11");
-        a1.setTotalMarks(100);
-        a1.setStatus("active");
-        a1.setSubmissionCount(5);
-        a1.setCreatedAt(Instant.now().toString());
-        a1.setUpdatedAt(Instant.now().toString());
-        demoAssignments.put(a1.getId(), a1);
-
-        Assignment a2 = new Assignment();
-        a2.setId("demo-assignment-002");
-        a2.setTitle("HTML/CSS Project");
-        a2.setDescription("Build a responsive landing page");
-        a2.setCourseId("demo-course-002");
-        a2.setCreatedBy("demo-teacher-001");
-        a2.setDueDate("2026-03-18");
-        a2.setTotalMarks(150);
-        a2.setStatus("active");
-        a2.setSubmissionCount(12);
-        a2.setCreatedAt(Instant.now().toString());
-        a2.setUpdatedAt(Instant.now().toString());
-        demoAssignments.put(a2.getId(), a2);
-    }
-
     private boolean isDemoMode() {
         return firestore == null;
     }

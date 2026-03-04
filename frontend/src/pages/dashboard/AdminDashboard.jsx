@@ -1,5 +1,7 @@
+import { useState, useEffect } from 'react';
 import StatsCard from '../../components/ui/StatsCard';
 import DataTable from '../../components/ui/DataTable';
+import api from '../../config/api';
 import {
   HiOutlineUsers,
   HiOutlineBookOpen,
@@ -8,19 +10,46 @@ import {
 } from 'react-icons/hi';
 
 const AdminDashboard = () => {
+  const [users, setUsers] = useState([]);
+  const [courses, setCourses] = useState([]);
+  const [classes, setClasses] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const [usersRes, coursesRes, classesRes] = await Promise.all([
+          api.get('/users').catch(() => ({ data: [] })),
+          api.get('/courses').catch(() => ({ data: [] })),
+          api.get('/classes').catch(() => ({ data: [] })),
+        ]);
+        setUsers(usersRes.data || []);
+        setCourses(coursesRes.data || []);
+        setClasses(classesRes.data || []);
+      } catch (error) {
+        console.error('Error fetching dashboard data:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchData();
+  }, []);
+
   const stats = [
-    { title: 'Total Users', value: '1,234', change: 12, icon: HiOutlineUsers, color: 'primary' },
-    { title: 'Total Courses', value: '86', change: 8, icon: HiOutlineBookOpen, color: 'success' },
-    { title: 'Active Classes', value: '342', change: 5, icon: HiOutlineAcademicCap, color: 'warning' },
-    { title: 'Revenue', value: '₹2,45,000', change: 20, icon: HiOutlineCurrencyDollar, color: 'info' },
+    { title: 'Total Users', value: users.length.toString(), change: 0, icon: HiOutlineUsers, color: 'primary' },
+    { title: 'Total Courses', value: courses.length.toString(), change: 0, icon: HiOutlineBookOpen, color: 'success' },
+    { title: 'Active Classes', value: classes.length.toString(), change: 0, icon: HiOutlineAcademicCap, color: 'warning' },
+    { title: 'Revenue', value: '₹0', change: 0, icon: HiOutlineCurrencyDollar, color: 'info' },
   ];
 
-  const recentUsers = [
-    { id: 1, name: 'Alice Johnson', email: 'alice@email.com', role: 'student', status: 'active', joined: 'Mar 1, 2026' },
-    { id: 2, name: 'Prof. Smith', email: 'smith@email.com', role: 'teacher', status: 'active', joined: 'Feb 28, 2026' },
-    { id: 3, name: 'Bob Wilson', email: 'bob@email.com', role: 'student', status: 'inactive', joined: 'Feb 25, 2026' },
-    { id: 4, name: 'Prof. Davis', email: 'davis@email.com', role: 'teacher', status: 'active', joined: 'Feb 20, 2026' },
-  ];
+  const recentUsers = users.slice(0, 5).map((user, index) => ({
+    id: user.id || index,
+    name: user.name || 'Unknown',
+    email: user.email || '',
+    role: user.role || 'student',
+    status: user.status || 'active',
+    joined: user.createdAt ? new Date(user.createdAt).toLocaleDateString() : 'N/A',
+  }));
 
   const userColumns = [
     { header: 'Name', render: (row) => <span className="text-white font-medium">{row.name}</span> },
@@ -66,26 +95,36 @@ const AdminDashboard = () => {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <div className="bg-surface-card rounded-2xl p-6 border border-navy-600/20">
           <h2 className="text-lg font-semibold text-white mb-4">User Distribution</h2>
-          <div className="space-y-4">
-            {[
-              { label: 'Students', count: 980, total: 1234, color: 'bg-success' },
-              { label: 'Teachers', count: 240, total: 1234, color: 'bg-brand-primary' },
-              { label: 'Admins', count: 14, total: 1234, color: 'bg-error' },
-            ].map((item, i) => (
-              <div key={i}>
-                <div className="flex justify-between text-sm mb-1">
-                  <span className="text-text-secondary">{item.label}</span>
-                  <span className="text-white">{item.count}</span>
-                </div>
-                <div className="w-full h-2 bg-navy-700 rounded-full overflow-hidden">
-                  <div
-                    className={`h-full ${item.color} rounded-full`}
-                    style={{ width: `${(item.count / item.total) * 100}%` }}
-                  />
-                </div>
-              </div>
-            ))}
-          </div>
+          {users.length === 0 ? (
+            <p className="text-text-muted text-sm">No users registered yet.</p>
+          ) : (
+            <div className="space-y-4">
+              {(() => {
+                const studentCount = users.filter(u => u.role === 'student').length;
+                const teacherCount = users.filter(u => u.role === 'teacher').length;
+                const adminCount = users.filter(u => u.role === 'admin').length;
+                const total = users.length || 1;
+                return [
+                  { label: 'Students', count: studentCount, total, color: 'bg-success' },
+                  { label: 'Teachers', count: teacherCount, total, color: 'bg-brand-primary' },
+                  { label: 'Admins', count: adminCount, total, color: 'bg-error' },
+                ].map((item, i) => (
+                  <div key={i}>
+                    <div className="flex justify-between text-sm mb-1">
+                      <span className="text-text-secondary">{item.label}</span>
+                      <span className="text-white">{item.count}</span>
+                    </div>
+                    <div className="w-full h-2 bg-navy-700 rounded-full overflow-hidden">
+                      <div
+                        className={`h-full ${item.color} rounded-full`}
+                        style={{ width: `${(item.count / item.total) * 100}%` }}
+                      />
+                    </div>
+                  </div>
+                ));
+              })()}
+            </div>
+          )}
         </div>
 
         <div className="bg-surface-card rounded-2xl p-6 border border-navy-600/20">

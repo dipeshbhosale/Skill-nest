@@ -29,19 +29,6 @@ public class SubmissionService {
     // In-memory store for demo mode
     private final Map<String, Submission> demoSubmissions = new ConcurrentHashMap<>();
 
-    // Initialize demo submissions
-    {
-        Submission s1 = new Submission();
-        s1.setId("demo-submission-001");
-        s1.setAssignmentId("demo-assignment-001");
-        s1.setStudentId("demo-student-001");
-        s1.setStudentName("John Doe");
-        s1.setFileUrl("https://example.com/submissions/quiz.pdf");
-        s1.setStatus("submitted");
-        s1.setSubmittedAt(Instant.now().toString());
-        demoSubmissions.put(s1.getId(), s1);
-    }
-
     private boolean isDemoMode() {
         return firestore == null;
     }

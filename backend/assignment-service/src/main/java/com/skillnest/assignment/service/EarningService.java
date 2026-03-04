@@ -26,29 +26,6 @@ public class EarningService {
     // In-memory store for demo mode
     private final Map<String, Earning> demoEarnings = new ConcurrentHashMap<>();
 
-    // Initialize demo earnings
-    {
-        Earning e1 = new Earning();
-        e1.setId("demo-earning-001");
-        e1.setTeacherId("demo-teacher-001");
-        e1.setAmount(500.00);
-        e1.setDate("2026-03-01");
-        e1.setDescription("Course: Introduction to Programming");
-        e1.setStatus("paid");
-        e1.setCreatedAt(Instant.now().toString());
-        demoEarnings.put(e1.getId(), e1);
-
-        Earning e2 = new Earning();
-        e2.setId("demo-earning-002");
-        e2.setTeacherId("demo-teacher-001");
-        e2.setAmount(750.00);
-        e2.setDate("2026-03-02");
-        e2.setDescription("Course: Web Development Fundamentals");
-        e2.setStatus("pending");
-        e2.setCreatedAt(Instant.now().toString());
-        demoEarnings.put(e2.getId(), e2);
-    }
-
     private boolean isDemoMode() {
         return firestore == null;
     }

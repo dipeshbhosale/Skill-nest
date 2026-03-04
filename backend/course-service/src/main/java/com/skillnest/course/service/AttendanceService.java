@@ -25,17 +25,6 @@ public class AttendanceService {
     // In-memory store for demo mode
     private final Map<String, Attendance> demoAttendance = new ConcurrentHashMap<>();
 
-    // Initialize demo attendance
-    {
-        Attendance a1 = new Attendance();
-        a1.setId("demo-attendance-001");
-        a1.setClassId("demo-class-001");
-        a1.setStudentId("demo-student-001");
-        a1.setCourseId("demo-course-001");
-        a1.setStatus("present");
-        demoAttendance.put(a1.getId(), a1);
-    }
-
     private boolean isDemoMode() {
         return firestore == null;
     }

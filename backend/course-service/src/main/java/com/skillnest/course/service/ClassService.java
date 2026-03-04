@@ -28,31 +28,6 @@ public class ClassService {
     // In-memory store for demo mode
     private final Map<String, ClassSession> demoClasses = new ConcurrentHashMap<>();
 
-    // Initialize demo classes
-    {
-        ClassSession c1 = new ClassSession();
-        c1.setId("demo-class-001");
-        c1.setCourseId("demo-course-001");
-        c1.setTitle("Introduction to Variables");
-        c1.setDate("2026-03-05");
-        c1.setTime("10:00");
-        c1.setDuration(60);
-        c1.setStatus("scheduled");
-        c1.setCreatedAt(System.currentTimeMillis());
-        demoClasses.put(c1.getId(), c1);
-
-        ClassSession c2 = new ClassSession();
-        c2.setId("demo-class-002");
-        c2.setCourseId("demo-course-002");
-        c2.setTitle("HTML Fundamentals");
-        c2.setDate("2026-03-06");
-        c2.setTime("14:00");
-        c2.setDuration(90);
-        c2.setStatus("scheduled");
-        c2.setCreatedAt(System.currentTimeMillis());
-        demoClasses.put(c2.getId(), c2);
-    }
-
     private boolean isDemoMode() {
         return firestore == null;
     }
