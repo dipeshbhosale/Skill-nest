@@ -5,29 +5,87 @@ import com.google.cloud.firestore.*;
 import com.skillnest.user.model.StudentProfile;
 import com.skillnest.user.model.TeacherProfile;
 import com.skillnest.user.model.User;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 
 @Service
 public class UserService {
 
-    private final Firestore firestore;
+    private static final Logger logger = LoggerFactory.getLogger(UserService.class);
+
+    @Autowired(required = false)
+    private Firestore firestore;
 
     private static final String USERS_COLLECTION = "users";
     private static final String TEACHER_PROFILES_COLLECTION = "teacher_profiles";
     private static final String STUDENT_PROFILES_COLLECTION = "student_profiles";
 
-    public UserService(Firestore firestore) {
-        this.firestore = firestore;
+    // In-memory stores for demo mode
+    private final Map<String, User> demoUsers = new ConcurrentHashMap<>();
+    private final Map<String, TeacherProfile> demoTeacherProfiles = new ConcurrentHashMap<>();
+    private final Map<String, StudentProfile> demoStudentProfiles = new ConcurrentHashMap<>();
+
+    // Initialize demo data
+    {
+        User admin = new User();
+        admin.setId("demo-admin-001");
+        admin.setName("Admin User");
+        admin.setEmail("admin@skillnest.com");
+        admin.setRole("admin");
+        admin.setStatus("active");
+        admin.setCreatedAt(System.currentTimeMillis());
+        demoUsers.put(admin.getId(), admin);
+
+        User teacher = new User();
+        teacher.setId("demo-teacher-001");
+        teacher.setName("Prof. Smith");
+        teacher.setEmail("teacher@skillnest.com");
+        teacher.setRole("teacher");
+        teacher.setStatus("active");
+        teacher.setCreatedAt(System.currentTimeMillis());
+        demoUsers.put(teacher.getId(), teacher);
+
+        User student = new User();
+        student.setId("demo-student-001");
+        student.setName("John Doe");
+        student.setEmail("student@skillnest.com");
+        student.setRole("student");
+        student.setStatus("active");
+        student.setCreatedAt(System.currentTimeMillis());
+        demoUsers.put(student.getId(), student);
+
+        TeacherProfile teacherProfile = new TeacherProfile();
+        teacherProfile.setUserId("demo-teacher-001");
+        teacherProfile.setSpecializations(List.of("Computer Science", "Java Programming"));
+        teacherProfile.setQualifications("PhD in Computer Science");
+        teacherProfile.setBio("Experienced professor with 10+ years of teaching");
+        teacherProfile.setPerClassRate(50.0);
+        demoTeacherProfiles.put("demo-teacher-001", teacherProfile);
+
+        StudentProfile studentProfile = new StudentProfile();
+        studentProfile.setUserId("demo-student-001");
+        studentProfile.setGradeLevel("Undergraduate");
+        studentProfile.setInterests(List.of("Programming", "Web Development"));
+        demoStudentProfiles.put("demo-student-001", studentProfile);
+    }
+
+    private boolean isDemoMode() {
+        return firestore == null;
     }
 
     // ==================== User CRUD ====================
 
     public List<User> getAllUsers() throws ExecutionException, InterruptedException {
+        if (isDemoMode()) {
+            logger.info("Demo mode: returning demo users");
+            return new ArrayList<>(demoUsers.values());
+        }
         ApiFuture<QuerySnapshot> future = firestore.collection(USERS_COLLECTION).get();
         List<QueryDocumentSnapshot> documents = future.get().getDocuments();
         List<User> users = new ArrayList<>();
@@ -42,6 +100,10 @@ public class UserService {
     }
 
     public User getUserById(String userId) throws ExecutionException, InterruptedException {
+        if (isDemoMode()) {
+            logger.info("Demo mode: getting user {}", userId);
+            return demoUsers.get(userId);
+        }
         DocumentSnapshot doc = firestore.collection(USERS_COLLECTION).document(userId).get().get();
         if (!doc.exists()) {
             return null;
@@ -53,6 +115,18 @@ public class UserService {
     }
 
     public User updateUser(String userId, Map<String, Object> updates) throws ExecutionException, InterruptedException {
+        if (isDemoMode()) {
+            logger.info("Demo mode: updating user {}", userId);
+            User user = demoUsers.get(userId);
+            if (user != null) {
+                if (updates.containsKey("name")) user.setName((String) updates.get("name"));
+                if (updates.containsKey("phone")) user.setPhone((String) updates.get("phone"));
+                if (updates.containsKey("status")) user.setStatus((String) updates.get("status"));
+                user.setUpdatedAt(System.currentTimeMillis());
+                demoUsers.put(userId, user);
+            }
+            return user;
+        }
         DocumentReference docRef = firestore.collection(USERS_COLLECTION).document(userId);
         DocumentSnapshot doc = docRef.get().get();
         if (!doc.exists()) {
@@ -72,6 +146,10 @@ public class UserService {
     }
 
     public boolean deleteUser(String userId) throws ExecutionException, InterruptedException {
+        if (isDemoMode()) {
+            logger.info("Demo mode: deleting user {}", userId);
+            return demoUsers.remove(userId) != null;
+        }
         DocumentReference docRef = firestore.collection(USERS_COLLECTION).document(userId);
         DocumentSnapshot doc = docRef.get().get();
         if (!doc.exists()) {
@@ -90,6 +168,10 @@ public class UserService {
     // ==================== Teacher Profile ====================
 
     public TeacherProfile getTeacherProfile(String userId) throws ExecutionException, InterruptedException {
+        if (isDemoMode()) {
+            logger.info("Demo mode: getting teacher profile for {}", userId);
+            return demoTeacherProfiles.get(userId);
+        }
         DocumentSnapshot doc = firestore.collection(TEACHER_PROFILES_COLLECTION).document(userId).get().get();
         if (!doc.exists()) {
             return null;
@@ -99,6 +181,12 @@ public class UserService {
 
     public TeacherProfile updateTeacherProfile(String userId, TeacherProfile profile)
             throws ExecutionException, InterruptedException {
+        if (isDemoMode()) {
+            logger.info("Demo mode: updating teacher profile for {}", userId);
+            profile.setUserId(userId);
+            demoTeacherProfiles.put(userId, profile);
+            return profile;
+        }
         profile.setUserId(userId);
         firestore.collection(TEACHER_PROFILES_COLLECTION).document(userId).set(profile.toMap()).get();
         return getTeacherProfile(userId);
@@ -107,6 +195,10 @@ public class UserService {
     // ==================== Student Profile ====================
 
     public StudentProfile getStudentProfile(String userId) throws ExecutionException, InterruptedException {
+        if (isDemoMode()) {
+            logger.info("Demo mode: getting student profile for {}", userId);
+            return demoStudentProfiles.get(userId);
+        }
         DocumentSnapshot doc = firestore.collection(STUDENT_PROFILES_COLLECTION).document(userId).get().get();
         if (!doc.exists()) {
             return null;
@@ -116,6 +208,12 @@ public class UserService {
 
     public StudentProfile updateStudentProfile(String userId, StudentProfile profile)
             throws ExecutionException, InterruptedException {
+        if (isDemoMode()) {
+            logger.info("Demo mode: updating student profile for {}", userId);
+            profile.setUserId(userId);
+            demoStudentProfiles.put(userId, profile);
+            return profile;
+        }
         profile.setUserId(userId);
         firestore.collection(STUDENT_PROFILES_COLLECTION).document(userId).set(profile.toMap()).get();
         return getStudentProfile(userId);

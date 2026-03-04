@@ -3,23 +3,54 @@ package com.skillnest.assignment.service;
 import com.google.api.core.ApiFuture;
 import com.google.cloud.firestore.*;
 import com.skillnest.assignment.model.Earning;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
+import java.util.stream.Collectors;
 
 @Service
 public class EarningService {
 
+    private static final Logger logger = LoggerFactory.getLogger(EarningService.class);
     private static final String COLLECTION_NAME = "earnings";
 
-    private final Firestore firestore;
+    @Autowired(required = false)
+    private Firestore firestore;
 
-    public EarningService(Firestore firestore) {
-        this.firestore = firestore;
+    // In-memory store for demo mode
+    private final Map<String, Earning> demoEarnings = new ConcurrentHashMap<>();
+
+    // Initialize demo earnings
+    {
+        Earning e1 = new Earning();
+        e1.setId("demo-earning-001");
+        e1.setTeacherId("demo-teacher-001");
+        e1.setAmount(500.00);
+        e1.setDate("2026-03-01");
+        e1.setDescription("Course: Introduction to Programming");
+        e1.setStatus("paid");
+        e1.setCreatedAt(Instant.now().toString());
+        demoEarnings.put(e1.getId(), e1);
+
+        Earning e2 = new Earning();
+        e2.setId("demo-earning-002");
+        e2.setTeacherId("demo-teacher-001");
+        e2.setAmount(750.00);
+        e2.setDate("2026-03-02");
+        e2.setDescription("Course: Web Development Fundamentals");
+        e2.setStatus("pending");
+        e2.setCreatedAt(Instant.now().toString());
+        demoEarnings.put(e2.getId(), e2);
+    }
+
+    private boolean isDemoMode() {
+        return firestore == null;
     }
 
     public Earning createEarning(Earning earning) throws ExecutionException, InterruptedException {
@@ -30,11 +61,24 @@ public class EarningService {
         }
         earning.setCreatedAt(Instant.now().toString());
 
+        if (isDemoMode()) {
+            logger.info("Demo mode: creating earning");
+            demoEarnings.put(id, earning);
+            return earning;
+        }
+
         firestore.collection(COLLECTION_NAME).document(id).set(earning.toMap()).get();
         return earning;
     }
 
     public List<Earning> getEarningsByTeacher(String teacherId) throws ExecutionException, InterruptedException {
+        if (isDemoMode()) {
+            logger.info("Demo mode: getting earnings for teacher {}", teacherId);
+            return demoEarnings.values().stream()
+                    .filter(e -> teacherId.equals(e.getTeacherId()))
+                    .collect(Collectors.toList());
+        }
+
         ApiFuture<QuerySnapshot> future = firestore.collection(COLLECTION_NAME)
                 .whereEqualTo("teacherId", teacherId).get();
         List<QueryDocumentSnapshot> documents = future.get().getDocuments();
@@ -47,6 +91,11 @@ public class EarningService {
     }
 
     public Earning getEarningById(String id) throws ExecutionException, InterruptedException {
+        if (isDemoMode()) {
+            logger.info("Demo mode: getting earning {}", id);
+            return demoEarnings.get(id);
+        }
+
         DocumentSnapshot document = firestore.collection(COLLECTION_NAME).document(id).get().get();
         if (document.exists()) {
             return Earning.fromMap(document.getData());
@@ -75,6 +124,16 @@ public class EarningService {
     }
 
     public Earning updateEarningStatus(String id, String status) throws ExecutionException, InterruptedException {
+        if (isDemoMode()) {
+            logger.info("Demo mode: updating earning status for {}", id);
+            Earning earning = demoEarnings.get(id);
+            if (earning != null) {
+                earning.setStatus(status);
+                demoEarnings.put(id, earning);
+            }
+            return earning;
+        }
+
         DocumentSnapshot document = firestore.collection(COLLECTION_NAME).document(id).get().get();
         if (!document.exists()) {
             return null;
