@@ -1,22 +1,39 @@
+import { useState, useEffect } from 'react';
 import StatsCard from '../../components/ui/StatsCard';
 import DataTable from '../../components/ui/DataTable';
-import { HiOutlineCurrencyDollar, HiOutlineCalendar, HiOutlineTrendingUp, HiOutlineDownload } from 'react-icons/hi';
+import { HiOutlineCurrencyDollar, HiOutlineCalendar, HiOutlineTrendingUp, HiOutlineDownload, HiOutlineCash } from 'react-icons/hi';
 import Button from '../../components/ui/Button';
+import api from '../../config/api';
 
 const Earnings = () => {
-  const stats = [
-    { title: 'Total Earnings', value: '₹45,200', change: 15, icon: HiOutlineCurrencyDollar, color: 'primary' },
-    { title: 'This Month', value: '₹8,500', change: 8, icon: HiOutlineCalendar, color: 'success' },
-    { title: 'Pending Payout', value: '₹3,200', icon: HiOutlineTrendingUp, color: 'warning' },
-    { title: 'Classes Completed', value: '86', change: 12, icon: HiOutlineCalendar, color: 'info' },
-  ];
+  const [earnings, setEarnings] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  const earnings = [
-    { id: 1, course: 'Advanced Java', class: 'Spring Boot Basics', date: 'Mar 3, 2026', students: 45, rate: '₹500', total: '₹500', status: 'paid' },
-    { id: 2, course: 'DSA', class: 'Trees & Graphs', date: 'Mar 3, 2026', students: 62, rate: '₹500', total: '₹500', status: 'pending' },
-    { id: 3, course: 'React.js', class: 'React Hooks', date: 'Mar 2, 2026', students: 35, rate: '₹500', total: '₹500', status: 'paid' },
-    { id: 4, course: 'Advanced Java', class: 'Microservices', date: 'Mar 1, 2026', students: 42, rate: '₹500', total: '₹500', status: 'paid' },
-    { id: 5, course: 'DSA', class: 'Dynamic Programming', date: 'Feb 28, 2026', students: 58, rate: '₹500', total: '₹500', status: 'paid' },
+  useEffect(() => {
+    const fetchEarnings = async () => {
+      try {
+        const response = await api.get('/earnings');
+        setEarnings(response.data || []);
+      } catch (error) {
+        console.error('Error fetching earnings:', error);
+        setEarnings([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchEarnings();
+  }, []);
+
+  const totalEarnings = earnings.reduce((sum, e) => sum + (parseFloat(e.amount) || 0), 0);
+  const pendingAmount = earnings.filter(e => e.status === 'pending').reduce((sum, e) => sum + (parseFloat(e.amount) || 0), 0);
+  const paidAmount = earnings.filter(e => e.status === 'paid').reduce((sum, e) => sum + (parseFloat(e.amount) || 0), 0);
+  const completedClasses = earnings.length;
+
+  const stats = [
+    { title: 'Total Earnings', value: `₹${totalEarnings.toLocaleString()}`, icon: HiOutlineCurrencyDollar, color: 'primary' },
+    { title: 'Paid', value: `₹${paidAmount.toLocaleString()}`, icon: HiOutlineCalendar, color: 'success' },
+    { title: 'Pending Payout', value: `₹${pendingAmount.toLocaleString()}`, icon: HiOutlineTrendingUp, color: 'warning' },
+    { title: 'Classes Completed', value: String(completedClasses), icon: HiOutlineCalendar, color: 'info' },
   ];
 
   const columns = [
@@ -78,7 +95,17 @@ const Earnings = () => {
         </div>
       </div>
 
-      <DataTable columns={columns} data={earnings} />
+      {loading ? (
+        <div className="text-center py-12 text-text-secondary">Loading earnings...</div>
+      ) : earnings.length === 0 ? (
+        <div className="text-center py-12 bg-navy-800/50 rounded-xl border border-navy-700/50">
+          <HiOutlineCash className="w-12 h-12 text-text-muted mx-auto mb-3" />
+          <h3 className="text-lg font-medium text-white mb-2">No Earnings Yet</h3>
+          <p className="text-text-secondary text-sm">Your earnings will appear here after completing classes.</p>
+        </div>
+      ) : (
+        <DataTable columns={columns} data={earnings} />
+      )}
     </div>
   );
 };

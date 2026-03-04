@@ -1,9 +1,10 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Button from '../../components/ui/Button';
 import Modal from '../../components/ui/Modal';
 import Input from '../../components/ui/Input';
 import DataTable from '../../components/ui/DataTable';
 import { useAuth } from '../../context/AuthContext';
+import api from '../../config/api';
 import { HiOutlinePlus, HiOutlineCalendar, HiOutlineClock, HiOutlineUsers, HiOutlineVideoCamera } from 'react-icons/hi';
 import toast from 'react-hot-toast';
 
@@ -11,15 +12,27 @@ const Classes = () => {
   const { isTeacher } = useAuth();
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [viewMode, setViewMode] = useState('list');
+  const [classes, setClasses] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  const classes = [
-    { id: 1, title: 'Spring Boot Basics', course: 'Advanced Java', date: 'Mar 3, 2026', time: '10:00 AM', duration: '1h', status: 'scheduled', students: 45, meetLink: '#' },
-    { id: 2, title: 'Trees & Graphs', course: 'DSA', date: 'Mar 3, 2026', time: '2:00 PM', duration: '1.5h', status: 'live', students: 62, meetLink: '#' },
-    { id: 3, title: 'React Hooks Deep Dive', course: 'React.js', date: 'Mar 4, 2026', time: '11:00 AM', duration: '1h', status: 'scheduled', students: 38, meetLink: '#' },
-    { id: 4, title: 'Microservices Architecture', course: 'Advanced Java', date: 'Mar 4, 2026', time: '3:00 PM', duration: '2h', status: 'scheduled', students: 45, meetLink: '#' },
-    { id: 5, title: 'Dynamic Programming', course: 'DSA', date: 'Mar 2, 2026', time: '2:00 PM', duration: '1.5h', status: 'completed', students: 58, meetLink: '#' },
-    { id: 6, title: 'Component Lifecycle', course: 'React.js', date: 'Mar 1, 2026', time: '11:00 AM', duration: '1h', status: 'completed', students: 35, meetLink: '#' },
-  ];
+  useEffect(() => {
+    const fetchClasses = async () => {
+      try {
+        const response = await api.get('/classes');
+        setClasses(response.data || []);
+      } catch (error) {
+        console.error('Error fetching classes:', error);
+        setClasses([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchClasses();
+  }, []);
+
+  const liveClasses = classes.filter(c => c.status === 'live').length;
+  const scheduledClasses = classes.filter(c => c.status === 'scheduled').length;
+  const completedClasses = classes.filter(c => c.status === 'completed').length;
 
   const columns = [
     {
@@ -106,7 +119,7 @@ const Classes = () => {
             </div>
             <div>
               <p className="text-xs text-text-muted">Live Now</p>
-              <p className="text-lg font-bold text-white">1</p>
+              <p className="text-lg font-bold text-white">{liveClasses}</p>
             </div>
           </div>
         </div>
@@ -117,7 +130,7 @@ const Classes = () => {
             </div>
             <div>
               <p className="text-xs text-text-muted">Upcoming</p>
-              <p className="text-lg font-bold text-white">3</p>
+              <p className="text-lg font-bold text-white">{scheduledClasses}</p>
             </div>
           </div>
         </div>
@@ -128,14 +141,20 @@ const Classes = () => {
             </div>
             <div>
               <p className="text-xs text-text-muted">Completed</p>
-              <p className="text-lg font-bold text-white">42</p>
+              <p className="text-lg font-bold text-white">{completedClasses}</p>
             </div>
           </div>
         </div>
       </div>
 
       {/* Classes Table */}
-      <DataTable columns={columns} data={classes} />
+      {classes.length === 0 ? (
+        <div className="text-center py-12 bg-surface-card rounded-2xl border border-navy-600/20">
+          <p className="text-text-muted text-lg">No classes scheduled yet</p>
+        </div>
+      ) : (
+        <DataTable columns={columns} data={classes} />
+      )}
 
       {/* Create Class Modal */}
       <Modal isOpen={showCreateModal} onClose={() => setShowCreateModal(false)} title="Schedule New Class" size="lg">

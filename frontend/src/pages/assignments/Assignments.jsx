@@ -1,9 +1,10 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Button from '../../components/ui/Button';
 import Modal from '../../components/ui/Modal';
 import Input from '../../components/ui/Input';
 import DataTable from '../../components/ui/DataTable';
 import { useAuth } from '../../context/AuthContext';
+import api from '../../config/api';
 import { HiOutlinePlus, HiOutlineClipboardList, HiOutlineUpload, HiOutlineEye } from 'react-icons/hi';
 import toast from 'react-hot-toast';
 
@@ -12,21 +13,23 @@ const Assignments = () => {
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showSubmitModal, setShowSubmitModal] = useState(false);
   const [selectedAssignment, setSelectedAssignment] = useState(null);
+  const [assignments, setAssignments] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  const assignments = [
-    { id: 1, title: 'Build REST API with Spring Boot', course: 'Advanced Java', dueDate: 'Mar 5, 2026', submissions: 32, total: 45, status: 'active' },
-    { id: 2, title: 'Implement Binary Search Tree', course: 'DSA', dueDate: 'Mar 7, 2026', submissions: 48, total: 62, status: 'active' },
-    { id: 3, title: 'React Todo App with Hooks', course: 'React.js', dueDate: 'Mar 10, 2026', submissions: 12, total: 38, status: 'active' },
-    { id: 4, title: 'Design Database Schema', course: 'DBMS', dueDate: 'Feb 28, 2026', submissions: 38, total: 40, status: 'closed' },
-    { id: 5, title: 'AWS EC2 Deployment', course: 'Cloud Computing', dueDate: 'Mar 2, 2026', submissions: 25, total: 30, status: 'closed' },
-  ];
-
-  const studentAssignments = [
-    { id: 1, title: 'Build REST API with Spring Boot', course: 'Advanced Java', dueDate: 'Mar 5, 2026', status: 'pending', grade: null },
-    { id: 2, title: 'Implement Binary Search Tree', course: 'DSA', dueDate: 'Mar 7, 2026', status: 'pending', grade: null },
-    { id: 3, title: 'React Todo App with Hooks', course: 'React.js', dueDate: 'Mar 10, 2026', status: 'submitted', grade: null },
-    { id: 4, title: 'Design Database Schema', course: 'DBMS', dueDate: 'Feb 28, 2026', status: 'graded', grade: 'A' },
-  ];
+  useEffect(() => {
+    const fetchAssignments = async () => {
+      try {
+        const response = await api.get('/assignments');
+        setAssignments(response.data || []);
+      } catch (error) {
+        console.error('Error fetching assignments:', error);
+        setAssignments([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchAssignments();
+  }, []);
 
   const teacherColumns = [
     {
@@ -126,10 +129,22 @@ const Assignments = () => {
         )}
       </div>
 
-      <DataTable
-        columns={isTeacher ? teacherColumns : studentColumns}
-        data={isTeacher ? assignments : studentAssignments}
-      />
+      {loading ? (
+        <div className="text-center py-12 text-text-secondary">Loading assignments...</div>
+      ) : assignments.length === 0 ? (
+        <div className="text-center py-12 bg-navy-800/50 rounded-xl border border-navy-700/50">
+          <HiOutlineClipboardList className="w-12 h-12 text-text-muted mx-auto mb-3" />
+          <h3 className="text-lg font-medium text-white mb-2">No Assignments Yet</h3>
+          <p className="text-text-secondary text-sm">
+            {isTeacher ? 'Create your first assignment to get started.' : 'No assignments have been posted yet.'}
+          </p>
+        </div>
+      ) : (
+        <DataTable
+          columns={isTeacher ? teacherColumns : studentColumns}
+          data={assignments}
+        />
+      )}
 
       {/* Create Assignment Modal */}
       <Modal isOpen={showCreateModal} onClose={() => setShowCreateModal(false)} title="Create Assignment" size="lg">

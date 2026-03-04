@@ -1,9 +1,10 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import CourseCard from '../../components/ui/CourseCard';
 import Button from '../../components/ui/Button';
 import Modal from '../../components/ui/Modal';
 import Input from '../../components/ui/Input';
 import { useAuth } from '../../context/AuthContext';
+import api from '../../config/api';
 import { HiOutlinePlus, HiOutlineSearch, HiOutlineFilter } from 'react-icons/hi';
 import toast from 'react-hot-toast';
 
@@ -13,17 +14,25 @@ const Courses = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [newCourse, setNewCourse] = useState({ title: '', description: '', category: '' });
+  const [courses, setCourses] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  const courses = [
-    { id: 1, title: 'Advanced Java Programming', description: 'Deep dive into Java Spring Boot microservices and enterprise development', category: 'Programming', teacherName: 'Prof. Smith', totalClasses: 24, enrolledStudents: 45, progress: 75 },
-    { id: 2, title: 'Data Structures & Algorithms', description: 'Master data structures for competitive programming and interviews', category: 'CS Fundamentals', teacherName: 'Prof. Johnson', totalClasses: 30, enrolledStudents: 62, progress: 45 },
-    { id: 3, title: 'React.js Masterclass', description: 'Build modern web applications with React, Tailwind CSS, and hooks', category: 'Web Development', teacherName: 'Prof. Davis', totalClasses: 20, enrolledStudents: 38, progress: 30 },
-    { id: 4, title: 'Python for Data Science', description: 'Learn Python with NumPy, Pandas, and Machine Learning basics', category: 'Data Science', teacherName: 'Prof. Wilson', totalClasses: 28, enrolledStudents: 55, progress: 60 },
-    { id: 5, title: 'Database Management Systems', description: 'SQL, NoSQL, Firebase, and database design principles', category: 'Database', teacherName: 'Prof. Smith', totalClasses: 22, enrolledStudents: 40, progress: 0 },
-    { id: 6, title: 'Cloud Computing with AWS', description: 'Deploy and manage applications on Amazon Web Services', category: 'Cloud', teacherName: 'Prof. Davis', totalClasses: 18, enrolledStudents: 30, progress: 15 },
-  ];
+  useEffect(() => {
+    const fetchCourses = async () => {
+      try {
+        const response = await api.get('/courses');
+        setCourses(response.data || []);
+      } catch (error) {
+        console.error('Error fetching courses:', error);
+        setCourses([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchCourses();
+  }, []);
 
-  const categories = ['all', 'Programming', 'CS Fundamentals', 'Web Development', 'Data Science', 'Database', 'Cloud'];
+  const categories = ['all', ...new Set(courses.map(c => c.category).filter(Boolean))];
 
   const filteredCourses = courses.filter((c) => {
     const matchesSearch = c.title.toLowerCase().includes(searchQuery.toLowerCase());

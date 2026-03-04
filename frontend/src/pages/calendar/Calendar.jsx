@@ -1,24 +1,29 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, isToday, addMonths, subMonths } from 'date-fns';
 import { HiOutlineChevronLeft, HiOutlineChevronRight, HiOutlinePlus } from 'react-icons/hi';
 import Button from '../../components/ui/Button';
+import api from '../../config/api';
 
 const Calendar = () => {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState(new Date());
+  const [events, setEvents] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  const events = [
-    { id: 1, title: 'Spring Boot Basics', type: 'class', date: '2026-03-03', time: '10:00 AM', color: 'bg-brand-primary' },
-    { id: 2, title: 'Trees & Graphs', type: 'class', date: '2026-03-03', time: '2:00 PM', color: 'bg-success' },
-    { id: 3, title: 'React Hooks', type: 'class', date: '2026-03-04', time: '11:00 AM', color: 'bg-brand-primary' },
-    { id: 4, title: 'REST API Assignment Due', type: 'assignment', date: '2026-03-05', time: '11:59 PM', color: 'bg-error' },
-    { id: 5, title: 'Microservices', type: 'class', date: '2026-03-04', time: '3:00 PM', color: 'bg-warning' },
-    { id: 6, title: 'BST Assignment Due', type: 'assignment', date: '2026-03-07', time: '11:59 PM', color: 'bg-error' },
-    { id: 7, title: 'Spring Security', type: 'class', date: '2026-03-06', time: '10:00 AM', color: 'bg-brand-primary' },
-    { id: 8, title: 'Graph Algorithms', type: 'class', date: '2026-03-10', time: '2:00 PM', color: 'bg-success' },
-    { id: 9, title: 'Todo App Due', type: 'assignment', date: '2026-03-10', time: '11:59 PM', color: 'bg-error' },
-    { id: 10, title: 'State Management', type: 'class', date: '2026-03-11', time: '11:00 AM', color: 'bg-brand-primary' },
-  ];
+  useEffect(() => {
+    const fetchEvents = async () => {
+      try {
+        const response = await api.get('/calendar/events');
+        setEvents(response.data || []);
+      } catch (error) {
+        console.error('Error fetching events:', error);
+        setEvents([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchEvents();
+  }, []);
 
   const monthStart = startOfMonth(currentDate);
   const monthEnd = endOfMonth(currentDate);

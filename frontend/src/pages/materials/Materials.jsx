@@ -1,23 +1,32 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Button from '../../components/ui/Button';
 import Modal from '../../components/ui/Modal';
 import Input from '../../components/ui/Input';
 import { useAuth } from '../../context/AuthContext';
+import api from '../../config/api';
 import { HiOutlineUpload, HiOutlineDocumentText, HiOutlineDownload, HiOutlineTrash, HiOutlineFolder } from 'react-icons/hi';
 import toast from 'react-hot-toast';
 
 const Materials = () => {
   const { isTeacher } = useAuth();
   const [showUploadModal, setShowUploadModal] = useState(false);
+  const [materials, setMaterials] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  const materials = [
-    { id: 1, title: 'Spring Boot Introduction Slides', course: 'Advanced Java', type: 'PDF', size: '2.4 MB', uploadedAt: 'Mar 1, 2026', downloads: 38 },
-    { id: 2, title: 'DSA Cheat Sheet', course: 'DSA', type: 'PDF', size: '1.1 MB', uploadedAt: 'Feb 28, 2026', downloads: 56 },
-    { id: 3, title: 'React Hooks Guide', course: 'React.js', type: 'PDF', size: '3.2 MB', uploadedAt: 'Feb 25, 2026', downloads: 42 },
-    { id: 4, title: 'Java Design Patterns', course: 'Advanced Java', type: 'PDF', size: '5.8 MB', uploadedAt: 'Feb 22, 2026', downloads: 31 },
-    { id: 5, title: 'Graph Theory Notes', course: 'DSA', type: 'DOCX', size: '890 KB', uploadedAt: 'Feb 20, 2026', downloads: 48 },
-    { id: 6, title: 'REST API Best Practices', course: 'Advanced Java', type: 'PDF', size: '1.6 MB', uploadedAt: 'Feb 18, 2026', downloads: 27 },
-  ];
+  useEffect(() => {
+    const fetchMaterials = async () => {
+      try {
+        const response = await api.get('/materials');
+        setMaterials(response.data || []);
+      } catch (error) {
+        console.error('Error fetching materials:', error);
+        setMaterials([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchMaterials();
+  }, []);
 
   const getFileIcon = (type) => {
     const colors = { PDF: 'text-error', DOCX: 'text-info', PPTX: 'text-warning', ZIP: 'text-success' };
@@ -39,6 +48,17 @@ const Materials = () => {
       </div>
 
       {/* Materials Grid */}
+      {loading ? (
+        <div className="text-center py-12 text-text-secondary">Loading materials...</div>
+      ) : materials.length === 0 ? (
+        <div className="text-center py-12 bg-navy-800/50 rounded-xl border border-navy-700/50">
+          <HiOutlineFolder className="w-12 h-12 text-text-muted mx-auto mb-3" />
+          <h3 className="text-lg font-medium text-white mb-2">No Materials Yet</h3>
+          <p className="text-text-secondary text-sm">
+            {isTeacher ? 'Upload your first learning material to get started.' : 'No learning materials have been uploaded yet.'}
+          </p>
+        </div>
+      ) : (
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         {materials.map((mat) => (
           <div key={mat.id} className="bg-surface-card rounded-2xl p-5 border border-navy-600/20 hover:border-brand-primary/30 transition-all group">
@@ -72,6 +92,7 @@ const Materials = () => {
           </div>
         ))}
       </div>
+      )}
 
       {/* Upload Modal */}
       <Modal isOpen={showUploadModal} onClose={() => setShowUploadModal(false)} title="Upload Material">

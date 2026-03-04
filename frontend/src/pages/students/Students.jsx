@@ -1,19 +1,36 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import DataTable from '../../components/ui/DataTable';
 import Button from '../../components/ui/Button';
+import api from '../../config/api';
 import { HiOutlineSearch, HiOutlineUserGroup, HiOutlineMail } from 'react-icons/hi';
 
 const Students = () => {
   const [searchQuery, setSearchQuery] = useState('');
+  const [students, setStudents] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  const students = [
-    { id: 1, name: 'Alice Johnson', email: 'alice@email.com', courses: 3, attendance: '95%', status: 'active', avatar: 'A' },
-    { id: 2, name: 'Bob Wilson', email: 'bob@email.com', courses: 2, attendance: '88%', status: 'active', avatar: 'B' },
-    { id: 3, name: 'Carol Davis', email: 'carol@email.com', courses: 4, attendance: '92%', status: 'active', avatar: 'C' },
-    { id: 4, name: 'David Brown', email: 'david@email.com', courses: 1, attendance: '75%', status: 'inactive', avatar: 'D' },
-    { id: 5, name: 'Eva Martinez', email: 'eva@email.com', courses: 3, attendance: '97%', status: 'active', avatar: 'E' },
-    { id: 6, name: 'Frank Thomas', email: 'frank@email.com', courses: 2, attendance: '82%', status: 'active', avatar: 'F' },
-  ];
+  useEffect(() => {
+    const fetchStudents = async () => {
+      try {
+        const response = await api.get('/users');
+        const allUsers = response.data || [];
+        // Filter to only show students
+        const studentUsers = allUsers.filter(user => user.role === 'STUDENT');
+        setStudents(studentUsers);
+      } catch (error) {
+        console.error('Error fetching students:', error);
+        setStudents([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchStudents();
+  }, []);
+
+  const activeStudents = students.filter(s => s.status === 'active').length;
+  const avgAttendance = students.length > 0 
+    ? Math.round(students.reduce((sum, s) => sum + (parseInt(s.attendance) || 0), 0) / students.length)
+    : 0;
 
   const columns = [
     {
@@ -96,7 +113,7 @@ const Students = () => {
           </div>
           <div>
             <p className="text-xs text-text-muted">Total Students</p>
-            <p className="text-lg font-bold text-white">248</p>
+            <p className="text-lg font-bold text-white">{students.length}</p>
           </div>
         </div>
         <div className="bg-surface-card rounded-2xl p-5 border border-navy-600/20 flex items-center gap-3">
@@ -105,7 +122,7 @@ const Students = () => {
           </div>
           <div>
             <p className="text-xs text-text-muted">Active</p>
-            <p className="text-lg font-bold text-white">235</p>
+            <p className="text-lg font-bold text-white">{activeStudents}</p>
           </div>
         </div>
         <div className="bg-surface-card rounded-2xl p-5 border border-navy-600/20 flex items-center gap-3">
@@ -114,12 +131,22 @@ const Students = () => {
           </div>
           <div>
             <p className="text-xs text-text-muted">Avg. Attendance</p>
-            <p className="text-lg font-bold text-white">89%</p>
+            <p className="text-lg font-bold text-white">{avgAttendance}%</p>
           </div>
         </div>
       </div>
 
-      <DataTable columns={columns} data={filtered} />
+      {loading ? (
+        <div className="text-center py-12 text-text-secondary">Loading students...</div>
+      ) : students.length === 0 ? (
+        <div className="text-center py-12 bg-navy-800/50 rounded-xl border border-navy-700/50">
+          <HiOutlineUserGroup className="w-12 h-12 text-text-muted mx-auto mb-3" />
+          <h3 className="text-lg font-medium text-white mb-2">No Students Yet</h3>
+          <p className="text-text-secondary text-sm">Students will appear here once they enroll.</p>
+        </div>
+      ) : (
+        <DataTable columns={columns} data={filtered} />
+      )}
     </div>
   );
 };

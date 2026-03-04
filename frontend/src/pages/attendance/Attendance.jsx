@@ -1,21 +1,36 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import DataTable from '../../components/ui/DataTable';
 import Button from '../../components/ui/Button';
 import { useAuth } from '../../context/AuthContext';
-import { HiOutlineDocumentText, HiOutlineCheck, HiOutlineX } from 'react-icons/hi';
+import api from '../../config/api';
+import { HiOutlineDocumentText, HiOutlineCheck, HiOutlineX, HiOutlineClipboardList } from 'react-icons/hi';
 
 const Attendance = () => {
   const { isTeacher } = useAuth();
   const [selectedClass, setSelectedClass] = useState('all');
+  const [attendanceData, setAttendanceData] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  const attendanceData = [
-    { id: 1, student: 'Alice Johnson', course: 'Advanced Java', class: 'Spring Boot Basics', date: 'Mar 3, 2026', status: 'present' },
-    { id: 2, student: 'Bob Wilson', course: 'Advanced Java', class: 'Spring Boot Basics', date: 'Mar 3, 2026', status: 'present' },
-    { id: 3, student: 'Carol Davis', course: 'Advanced Java', class: 'Spring Boot Basics', date: 'Mar 3, 2026', status: 'absent' },
-    { id: 4, student: 'David Brown', course: 'DSA', class: 'Trees & Graphs', date: 'Mar 3, 2026', status: 'present' },
-    { id: 5, student: 'Eva Martinez', course: 'DSA', class: 'Trees & Graphs', date: 'Mar 3, 2026', status: 'present' },
-    { id: 6, student: 'Frank Thomas', course: 'React.js', class: 'React Hooks', date: 'Mar 2, 2026', status: 'absent' },
-  ];
+  useEffect(() => {
+    const fetchAttendance = async () => {
+      try {
+        const response = await api.get('/attendance');
+        setAttendanceData(response.data || []);
+      } catch (error) {
+        console.error('Error fetching attendance:', error);
+        setAttendanceData([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchAttendance();
+  }, []);
+
+  const presentCount = attendanceData.filter(a => a.status === 'present').length;
+  const absentCount = attendanceData.filter(a => a.status === 'absent').length;
+  const attendanceRate = attendanceData.length > 0 
+    ? ((presentCount / attendanceData.length) * 100).toFixed(1)
+    : 0;
 
   const columns = [
     {
@@ -67,10 +82,10 @@ const Attendance = () => {
       {/* Stats */}
       <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
         {[
-          { label: 'Total Records', value: '342', color: 'bg-brand-primary/20 text-brand-accent' },
-          { label: 'Present', value: '298', color: 'bg-success/20 text-success' },
-          { label: 'Absent', value: '44', color: 'bg-error/20 text-error' },
-          { label: 'Rate', value: '87.1%', color: 'bg-warning/20 text-warning' },
+          { label: 'Total Records', value: String(attendanceData.length), color: 'bg-brand-primary/20 text-brand-accent' },
+          { label: 'Present', value: String(presentCount), color: 'bg-success/20 text-success' },
+          { label: 'Absent', value: String(absentCount), color: 'bg-error/20 text-error' },
+          { label: 'Rate', value: `${attendanceRate}%`, color: 'bg-warning/20 text-warning' },
         ].map((stat, i) => (
           <div key={i} className="bg-surface-card rounded-2xl p-5 border border-navy-600/20 text-center">
             <p className="text-xs text-text-muted">{stat.label}</p>
@@ -79,7 +94,17 @@ const Attendance = () => {
         ))}
       </div>
 
-      <DataTable columns={columns} data={attendanceData} />
+      {loading ? (
+        <div className="text-center py-12 text-text-secondary">Loading attendance records...</div>
+      ) : attendanceData.length === 0 ? (
+        <div className="text-center py-12 bg-navy-800/50 rounded-xl border border-navy-700/50">
+          <HiOutlineClipboardList className="w-12 h-12 text-text-muted mx-auto mb-3" />
+          <h3 className="text-lg font-medium text-white mb-2">No Attendance Records</h3>
+          <p className="text-text-secondary text-sm">Attendance records will appear here once classes are held.</p>
+        </div>
+      ) : (
+        <DataTable columns={columns} data={attendanceData} />
+      )}
     </div>
   );
 };
