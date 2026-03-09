@@ -82,40 +82,42 @@ const RegisterPage = () => {
           <h1 className="text-3xl font-bold text-navy-800 mb-2">Create Account</h1>
           <p className="text-text-muted mb-8">Fill in the details to get started</p>
 
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit} className="space-y-5">
             {/* Name */}
             <div>
-              <label className="block text-sm font-medium text-navy-600 mb-2">Full Name</label>
+              <label className="block text-sm font-medium text-navy-600 mb-3">Full Name</label>
               <div className="relative">
-                <HiOutlineUser className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-text-muted" />
+                <HiOutlineUser className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-text-muted" />
                 <input
                   type="text"
                   value={form.name}
                   onChange={update('name')}
                   placeholder="John Doe"
-                  className="w-full pl-12 pr-4 py-3 rounded-xl border border-surface-border bg-white text-navy-700 placeholder:text-text-muted focus:outline-none focus:ring-2 focus:ring-brand-primary/30 focus:border-brand-primary transition-all"
+                  style={{ paddingLeft: '2.75rem' }}
+                  className="w-full pr-4 py-3 rounded-xl border border-surface-border bg-white text-navy-700 placeholder:text-text-muted focus:outline-none focus:ring-2 focus:ring-brand-primary/30 focus:border-brand-primary transition-all"
                 />
               </div>
             </div>
 
             {/* Email */}
             <div>
-              <label className="block text-sm font-medium text-navy-600 mb-2">Email</label>
+              <label className="block text-sm font-medium text-navy-600 mb-3">Email</label>
               <div className="relative">
-                <HiOutlineMail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-text-muted" />
+                <HiOutlineMail className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-text-muted" />
                 <input
                   type="email"
                   value={form.email}
                   onChange={update('email')}
                   placeholder="you@college.edu"
-                  className="w-full pl-12 pr-4 py-3 rounded-xl border border-surface-border bg-white text-navy-700 placeholder:text-text-muted focus:outline-none focus:ring-2 focus:ring-brand-primary/30 focus:border-brand-primary transition-all"
+                  style={{ paddingLeft: '2.75rem' }}
+                  className="w-full pr-4 py-3 rounded-xl border border-surface-border bg-white text-navy-700 placeholder:text-text-muted focus:outline-none focus:ring-2 focus:ring-brand-primary/30 focus:border-brand-primary transition-all"
                 />
               </div>
             </div>
 
             {/* Role */}
             <div>
-              <label className="block text-sm font-medium text-navy-600 mb-2">Role</label>
+              <label className="block text-sm font-medium text-navy-600 mb-3">Role</label>
               <select
                 value={form.role}
                 onChange={update('role')}
@@ -128,15 +130,16 @@ const RegisterPage = () => {
 
             {/* Password */}
             <div>
-              <label className="block text-sm font-medium text-navy-600 mb-2">Password</label>
+              <label className="block text-sm font-medium text-navy-600 mb-3">Password</label>
               <div className="relative">
-                <HiOutlineLockClosed className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-text-muted" />
+                <HiOutlineLockClosed className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-text-muted" />
                 <input
                   type={showPassword ? 'text' : 'password'}
                   value={form.password}
                   onChange={update('password')}
                   placeholder="Min 6 characters"
-                  className="w-full pl-12 pr-12 py-3 rounded-xl border border-surface-border bg-white text-navy-700 placeholder:text-text-muted focus:outline-none focus:ring-2 focus:ring-brand-primary/30 focus:border-brand-primary transition-all"
+                  style={{ paddingLeft: '2.75rem' }}
+                  className="w-full pr-12 py-3 rounded-xl border border-surface-border bg-white text-navy-700 placeholder:text-text-muted focus:outline-none focus:ring-2 focus:ring-brand-primary/30 focus:border-brand-primary transition-all"
                 />
                 <button
                   type="button"
@@ -150,15 +153,16 @@ const RegisterPage = () => {
 
             {/* Confirm password */}
             <div>
-              <label className="block text-sm font-medium text-navy-600 mb-2">Confirm Password</label>
+              <label className="block text-sm font-medium text-navy-600 mb-3">Confirm Password</label>
               <div className="relative">
-                <HiOutlineLockClosed className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-text-muted" />
+                <HiOutlineLockClosed className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-text-muted" />
                 <input
                   type={showPassword ? 'text' : 'password'}
                   value={form.confirmPassword}
                   onChange={update('confirmPassword')}
                   placeholder="Repeat password"
-                  className="w-full pl-12 pr-4 py-3 rounded-xl border border-surface-border bg-white text-navy-700 placeholder:text-text-muted focus:outline-none focus:ring-2 focus:ring-brand-primary/30 focus:border-brand-primary transition-all"
+                  style={{ paddingLeft: '2.75rem' }}
+                  className="w-full pr-4 py-3 rounded-xl border border-surface-border bg-white text-navy-700 placeholder:text-text-muted focus:outline-none focus:ring-2 focus:ring-brand-primary/30 focus:border-brand-primary transition-all"
                 />
               </div>
             </div>

@@ -79,33 +79,35 @@ const LoginPage = () => {
           <h1 className="text-3xl font-bold text-navy-800 mb-2">Welcome Back</h1>
           <p className="text-text-muted mb-8">Enter your credentials to access your account</p>
 
-          <form onSubmit={handleSubmit} className="space-y-5">
+          <form onSubmit={handleSubmit} className="space-y-6">
             {/* Email */}
             <div>
-              <label className="block text-sm font-medium text-navy-600 mb-2">Email</label>
+              <label className="block text-sm font-medium text-navy-600 mb-3">Email</label>
               <div className="relative">
-                <HiOutlineMail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-text-muted" />
+                <HiOutlineMail className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-text-muted" />
                 <input
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="you@college.edu"
-                  className="w-full pl-12 pr-4 py-3 rounded-xl border border-surface-border bg-white text-navy-700 placeholder:text-text-muted focus:outline-none focus:ring-2 focus:ring-brand-primary/30 focus:border-brand-primary transition-all"
+                  style={{ paddingLeft: '2.75rem' }}
+                  className="w-full pr-4 py-3 rounded-xl border border-surface-border bg-white text-navy-700 placeholder:text-text-muted focus:outline-none focus:ring-2 focus:ring-brand-primary/30 focus:border-brand-primary transition-all"
                 />
               </div>
             </div>
 
             {/* Password */}
             <div>
-              <label className="block text-sm font-medium text-navy-600 mb-2">Password</label>
+              <label className="block text-sm font-medium text-navy-600 mb-3">Password</label>
               <div className="relative">
-                <HiOutlineLockClosed className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-text-muted" />
+                <HiOutlineLockClosed className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-text-muted" />
                 <input
                   type={showPassword ? 'text' : 'password'}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="Enter your password"
-                  className="w-full pl-12 pr-12 py-3 rounded-xl border border-surface-border bg-white text-navy-700 placeholder:text-text-muted focus:outline-none focus:ring-2 focus:ring-brand-primary/30 focus:border-brand-primary transition-all"
+                  style={{ paddingLeft: '2.75rem' }}
+                  className="w-full pr-12 py-3 rounded-xl border border-surface-border bg-white text-navy-700 placeholder:text-text-muted focus:outline-none focus:ring-2 focus:ring-brand-primary/30 focus:border-brand-primary transition-all"
                 />
                 <button
                   type="button"
